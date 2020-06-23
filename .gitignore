@@ -6,6 +6,7 @@
 !.cproject
 !*.ioc
 !*.h
+!*.hpp
 !*.ld
 !*.cpp
 /Drivers/

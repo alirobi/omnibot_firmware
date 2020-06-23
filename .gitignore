@@ -1,0 +1,11 @@
+*.*
+!.gitignore
+!*.c
+!*.s
+!.project
+!.cproject
+!*.ioc
+!*.h
+!*.ld
+!*.cpp
+/Drivers/

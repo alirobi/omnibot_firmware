@@ -190,7 +190,17 @@ void LSM6::read(void){
 	readGyro();
 }
 
-void LSM6::vectorNormalize(vec<float> *a){
+void LSM6::vector_cross(const vec *a, const vec *b, vec *out){
+		out-> x = (a->y * b->z) - (a->z * b->y);
+		out-> y = (a->z * b->x) - (a->x * b->z);
+		out-> z = (a->x * b->y) - (a->y * b->x);
+	}
+
+float LSM6::vector_dot(const vec *a, const vec *b){
+	return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
+}
+
+void LSM6::vectorNormalize(vec *a){
 	float mag = sqrt(vector_dot(a, a));
 	a->x /= mag;
 	a->y /= mag;

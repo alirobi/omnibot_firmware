@@ -5,18 +5,22 @@
  *      Author: Ali
  */
 
-#ifndef INC_LSM6_H_
-#define INC_LSM6_H_
+#ifndef INC_LSM6_HPP_
+#define INC_LSM6_HPP_
 
 #include "stm32f4xx_hal.h"
 #include <stm32_hal_legacy.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 	class LSM6
 	{
 		public:
-			template <typename T> struct vec
+			struct vec
 			{
-				T x, y, z;
+				float x, y, z;
 			};
 			enum deviceType{deviceDS33, deviceAuto};
 			enum sa0State{sa0Low, sa0High, sa0Auto};
@@ -91,8 +95,8 @@
 					      MD2_CFG           = 0x5F
 			};
 
-			vec<int16_t> a;
-			vec<int16_t> g;
+			vec a;
+			vec g;
 			uint8_t lastStatus;
 
 			LSM6(void);
@@ -111,9 +115,9 @@
 			uint16_t getTimeout(void);
 			bool timeoutOccured(void);
 
-			template <typename Ta, typename Tb, typename To> static void vector_cross(const vec<Ta> *a, const vec<Tb> *b, vec<To> *out);
-			template <typename Ta, typename Tb> static float vector_dot(const vec<Ta> *a, const vec<Tb> *b);
-			static void vectorNormalize(vec<float> *a);
+			static void vector_cross(const vec *a, const vec *b, vec *out);
+			static float vector_dot(const vec *a, const vec *b);
+			static void vectorNormalize(vec *a);
 
 		private:
 			deviceType _device;
@@ -124,14 +128,7 @@
 			I2C_HandleTypeDef hi2c1;
 	};
 
-	template <typename Ta, typename Tb, typename To> void LSM6::vector_cross(const vec<Ta> *a, const vec<Tb> *b, vec<To> *out){
-		out-> x = (a->y * b->z) - (a->z * b->y);
-		out-> y = (a->z * b->x) - (a->x * b->z);
-		out-> z = (a->x * b->y) - (a->y * b->x);
-	}
-
-	template <typename Ta, typename Tb> float LSM6::vector_dot(const vec<Ta> *a, const vec<Tb> *b){
-		return (a->x * b->x) + (a->y * b->y) + (a->z * b->z);
-	}
-
-#endif /* INC_LSM6_H_ */
+#ifdef __cplusplus
+}
+#endif
+#endif /* INC_LSM6_HPP_ */

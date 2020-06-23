@@ -32,7 +32,6 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <LSM6.hpp>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

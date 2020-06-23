@@ -5,7 +5,7 @@
  *      Author: Ali
  */
 
-#include <LSM6.h>
+#include <LSM6.hpp>
 #include <math.h>
 #include <stm32f4xx_hal_i2c_ex.h>
 #include <stm32f4xx_hal.h>

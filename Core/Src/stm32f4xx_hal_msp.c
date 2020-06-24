@@ -20,7 +20,7 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include <main.hpp>
+#include "main.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -161,10 +161,10 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
   
     __HAL_RCC_GPIOB_CLK_ENABLE();
     /**I2C1 GPIO Configuration    
-    PB7     ------> I2C1_SDA
-    PB8     ------> I2C1_SCL 
+    PB8     ------> I2C1_SCL
+    PB9     ------> I2C1_SDA 
     */
-    GPIO_InitStruct.Pin = I2C_BUS_SDA_Pin|I2C_BUS_SCL_Pin;
+    GPIO_InitStruct.Pin = I2C_BUS_SCL_Pin|I2C_BUS_SDA_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -197,10 +197,10 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c)
     __HAL_RCC_I2C1_CLK_DISABLE();
   
     /**I2C1 GPIO Configuration    
-    PB7     ------> I2C1_SDA
-    PB8     ------> I2C1_SCL 
+    PB8     ------> I2C1_SCL
+    PB9     ------> I2C1_SDA 
     */
-    HAL_GPIO_DeInit(GPIOB, I2C_BUS_SDA_Pin|I2C_BUS_SCL_Pin);
+    HAL_GPIO_DeInit(GPIOB, I2C_BUS_SCL_Pin|I2C_BUS_SDA_Pin);
 
   /* USER CODE BEGIN I2C1_MspDeInit 1 */
 

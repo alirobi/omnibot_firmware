@@ -18,6 +18,7 @@
 #define DS33_SA0_LOW_ADDRESS 0b1101010
 #define TEST_REG_ERROR -1
 #define DS33_WHO_ID 0X69
+#define LSM6_ADDRESS 0b1101010
 
 LSM6::LSM6(void){
 	_device = deviceAuto;
@@ -104,9 +105,9 @@ void LSM6::writeReg(uint8_t reg, uint8_t value){
 	HAL_StatusTypeDef status = HAL_OK;
 	status = HAL_I2C_Mem_Write(&hi2c1, address, (uint8_t)hi2c1.Init.OwnAddress1, reg, (uint8_t*)(&value), 3, io_timeout);
 	//HAL_I2C_Mem_Write(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
-	if(status != HAL_OK){
+//	if(status != HAL_OK){
 		// err handling
-	}
+//	}
 }
 
 uint8_t LSM6::readReg(uint8_t reg){
@@ -139,21 +140,30 @@ void LSM6::readAcc(void){
 //	Wire.write(OUTX_L_XL);
 //	Wire.endTransmission();
 //	Wire.requestFrom(address, (uint8_t)6);
-	uint8_t value = 0;
-	HAL_I2C_Mem_Read(&hi2c1, address, OUTX_L_XL, (uint8_t)1, &value, (uint8_t)6, io_timeout);
+	uint8_t buff[6] = {0};
+//	uint8_t *p = buff;
+	*buff = OUTX_L_XL;
+//	buff[1] = OUTX_H_XL;
+//	buff[2] = OUTY_L_XL;
+//	buff[3] = OUTY_H_XL;
+//	buff[4] = OUTZ_L_XL;
+//	buff[5]	= OUTZ_H_XL;
+	HAL_I2C_Master_Transmit(&hi2c1, LSM6_ADDRESS , buff, 1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(&hi2c1, LSM6_ADDRESS , buff, 6, HAL_MAX_DELAY);
+//	HAL_I2C_Mem_Read(&hi2c1, address, OUTX_L_XL, (uint8_t)1, &value, (uint8_t)6, io_timeout);
 	uint16_t millis_start = HAL_GetTick();
-	while(hi2c1.XferCount < 6){
+	while(hi2c1.XferSize < 6){
 		if(io_timeout > 0 && ((uint16_t)HAL_GetTick() - millis_start) > io_timeout){
 			did_timeout = true;
 			return;
 		}
 	}
-	uint8_t xla = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_XL, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
-	uint8_t xha = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_XL, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
-	uint8_t yla = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_XL, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
-	uint8_t yha = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_XL, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
-	uint8_t zla = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_XL, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
-	uint8_t zha = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_XL, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
+	uint8_t xla = buff[0];
+	uint8_t xha = buff[1];
+	uint8_t yla = buff[2];
+	uint8_t yha = buff[3];
+	uint8_t zla = buff[4];
+	uint8_t zha = buff[5];
 
 	a.x = (int16_t)(xha << 8 | xla);
 	a.y = (int16_t)(yha << 8 | yla);
@@ -165,21 +175,31 @@ void LSM6::readGyro(void){
 //	Wire.write(OUTX_L_G);
 //	Wire.endTransmission();
 //	Wire.requestFrom(address, (uint8_t)6);
-	uint8_t value = 0;
-	HAL_I2C_Mem_Read(&hi2c1, address, OUTX_L_G, (uint8_t)1, &value, (uint8_t)6, io_timeout);
+	uint8_t buff2[6];
+	uint8_t *p2 = buff2;
+	*p2 = OUTX_L_G;
+//	buff2[0] = OUTX_L_G;
+//	buff2[1] = OUTX_H_G;
+//	buff2[2] = OUTY_L_G;
+//	buff2[3] = OUTY_H_G;
+//	buff2[4] = OUTZ_L_G;
+//	buff2[5] = OUTZ_H_G;
+	HAL_I2C_Master_Transmit(&hi2c1, LSM6_ADDRESS , buff2, 1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(&hi2c1, LSM6_ADDRESS , buff2, 6, HAL_MAX_DELAY);
+//	HAL_I2C_Mem_Read(&hi2c1, address, OUTX_L_G, (uint8_t)1, &value, (uint8_t)6, io_timeout);
 	uint16_t millis_start = HAL_GetTick();
-	while(hi2c1.XferCount < 6){
+	while(hi2c1.XferSize < 6){
 		if(io_timeout > 0 && ((uint16_t)HAL_GetTick() - millis_start) > io_timeout){
 			did_timeout = true;
 			return;
 		}
 	}
-	uint8_t xlg = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_G, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
-	uint8_t xhg = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_G, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
-	uint8_t ylg = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_G, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
-	uint8_t yhg = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_G, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
-	uint8_t zlg = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_G, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
-	uint8_t zhg = HAL_I2C_Mem_Read(&hi2c1, address, (uint16_t)OUTX_L_G, (uint8_t)hi2c1.Init.OwnAddress1, &value, (uint16_t)1, io_timeout);
+	uint8_t xlg = buff2[0];
+	uint8_t xhg = buff2[1];
+	uint8_t ylg = buff2[2];
+	uint8_t yhg = buff2[3];
+	uint8_t zlg = buff2[4];
+	uint8_t zhg = buff2[5];
 
 	g.x = (int16_t)(xhg << 8 | xlg);
 	g.y = (int16_t)(yhg << 8 | ylg);

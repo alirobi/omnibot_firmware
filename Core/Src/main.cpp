@@ -114,13 +114,16 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
-
+  LSM6 IMU;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+//	  IMU.readReg(5);
+//	  IMU.writeReg(5, 10);
+	  IMU.read();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -225,7 +228,7 @@ static void MX_I2C1_Init(void)
 {
 
   /* USER CODE BEGIN I2C1_Init 0 */
-
+//	LSM6 IMU;
   /* USER CODE END I2C1_Init 0 */
 
   /* USER CODE BEGIN I2C1_Init 1 */
@@ -245,6 +248,10 @@ static void MX_I2C1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN I2C1_Init 2 */
+
+//  	LSM::writeReg();
+//	IMU.read();
+
 
   /* USER CODE END I2C1_Init 2 */
 

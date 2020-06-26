@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <LSM6.hpp>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -115,15 +116,13 @@ int main(void)
   MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
   LSM6 IMU;
+  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	  IMU.readReg(5);
-//	  IMU.writeReg(5, 10);
-	  IMU.read();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -567,7 +566,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(letstrythis_GPIO_Port, letstrythis_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : MOTOR_C_ARM_Pin MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin */
   GPIO_InitStruct.Pin = MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin;
@@ -576,12 +575,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : letstrythis_Pin */
-  GPIO_InitStruct.Pin = letstrythis_Pin;
+  /*Configure GPIO pin : TEST_PIN_Pin */
+  GPIO_InitStruct.Pin = TEST_PIN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(letstrythis_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(TEST_PIN_GPIO_Port, &GPIO_InitStruct);
 
 }
 

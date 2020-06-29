@@ -73,6 +73,7 @@ bool LSM6::init(deviceType device, sa0State sa0, I2C_HandleTypeDef * hi2c_ptr_in
 }
 
 void LSM6::enableDefault(void){
+//	__HAL_DBGMCU_FREEZE_I2C1_TIMEOUT();
 //	if(_device == deviceDS33){
 		//Accelerometer
 		// 0x80 = 0b10000000
@@ -87,6 +88,7 @@ void LSM6::enableDefault(void){
 		// IF_INC = 1 (automatically increment register address)
 		writeReg(CTRL3_C, 0x04);
 //	}
+//		__HAL_DBGMCU_UNFREEZE_I2C1_TIMEOUT();
 }
 
 void LSM6::writeReg(uint8_t reg, uint8_t value){
@@ -95,16 +97,17 @@ void LSM6::writeReg(uint8_t reg, uint8_t value){
 //	Wire.write(value);
 //	last_status = Wire.endTransmission();
 
-	uint8_t data[2];
-	data[0] = reg;
-	data[1] = value;
-	HAL_I2C_Master_Transmit(hi2c_ptr, LSM6_ADDRESS, data, 2, HAL_MAX_DELAY);
+//	uint8_t data[2];
+//	data[0] = reg;
+//	data[1] = value;
+//	HAL_I2C_Master_Transmit(hi2c_ptr, (uint8_t)(LSM6_ADDRESS<<1), data, 2, HAL_MAX_DELAY);
 //	HAL_I2C_Master_Transmit(hi2c_ptr, LSM6_ADDRESS, value, 1, io_timeout);
 	//unsure about io_timeout and 3
 //HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 
 //	HAL_StatusTypeDef status = HAL_OK;
-//	status = HAL_I2C_Mem_Write(hi2c_ptr, address, (uint8_t)hi2c_ptr->Init.OwnAddress1, reg, (uint8_t*)(&value), 3, io_timeout);
+//	status =
+	HAL_I2C_Mem_Write(hi2c_ptr, LSM6_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)(&value), 2, 100);
 	//HAL_I2C_Mem_Write(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 //	if(status != HAL_OK){
 		// err handling
@@ -124,7 +127,7 @@ uint8_t LSM6::readReg(uint8_t reg, uint8_t* buff){
 //	uint8_t *p = buff;
 //	*p = OUTX_L_XL;
 //	buff[0] = reg;
-	HAL_I2C_Master_Transmit(hi2c_ptr, LSM6_ADDRESS, &reg, 1, 10);
+	HAL_I2C_Master_Transmit(hi2c_ptr, (uint8_t)(LSM6_ADDRESS<<1), &reg, 1, 10);
 //	HAL_I2C_Master_Receive(hi2c_ptr, LSM6_ADDRESS, buff, 1, 100);
 
 //	uint8_t value = 0;
@@ -135,7 +138,7 @@ uint8_t LSM6::readReg(uint8_t reg, uint8_t* buff){
 //	uint8_t* p;
 //	*p = 0;
 	HAL_StatusTypeDef status = HAL_OK;
-	status = HAL_I2C_Master_Receive(hi2c_ptr, LSM6_ADDRESS, buff, 1, 10);
+	status = HAL_I2C_Master_Receive(hi2c_ptr, (uint8_t)(LSM6_ADDRESS<<1), buff, 1, 10);
 	//	HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 	if(status == HAL_OK){
 	}

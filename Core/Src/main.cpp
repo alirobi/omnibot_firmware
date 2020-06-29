@@ -84,7 +84,7 @@ static void MX_TIM9_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint8_t buff[12];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -115,6 +115,7 @@ int main(void)
   MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
   LSM6 IMU;
+//  HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -123,7 +124,12 @@ int main(void)
   {
 //	  IMU.readReg(5);
 //	  IMU.writeReg(5, 10);
-	  IMU.read();
+	  IMU.init();
+	  IMU.enableDefault();
+	  uint8_t val = IMU.readReg(LSM6::CTRL1_XL, buff);
+	  uint8_t val2 = IMU.readReg(LSM6::CTRL2_G, buff);
+	  uint8_t val3 = IMU.readReg(LSM6::CTRL3_C, buff);
+	  IMU.readAcc();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -135,6 +141,7 @@ int main(void)
   * @brief System Clock Configuration
   * @retval None
   */
+
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -313,9 +320,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 0;
+  htim1.Init.Prescaler = 32000;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 0;
+  htim1.Init.Period = 16254;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -566,8 +573,6 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(letstrythis_GPIO_Port, letstrythis_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : MOTOR_C_ARM_Pin MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin */
   GPIO_InitStruct.Pin = MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin;
@@ -576,12 +581,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : letstrythis_Pin */
-  GPIO_InitStruct.Pin = letstrythis_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(letstrythis_GPIO_Port, &GPIO_InitStruct);
+
 
 }
 

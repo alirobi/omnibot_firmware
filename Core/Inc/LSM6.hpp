@@ -107,7 +107,7 @@ extern "C" {
 
 			void enableDefault(void);
 			void writeReg(uint8_t reg, uint8_t value);
-			uint8_t readReg(uint8_t reg);
+			uint8_t readReg(uint8_t reg, uint8_t* buff);
 			void readAcc(void);
 			void readGyro(void);
 			void read(void);

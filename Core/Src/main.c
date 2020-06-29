@@ -246,7 +246,7 @@ static void MX_I2C1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN I2C1_Init 2 */
-
+  HAL_I2C_ClearBusyFlagErrata_2_14_7(&hi2c1);
   /* USER CODE END I2C1_Init 2 */
 
 }
@@ -598,8 +598,8 @@ void HAL_I2C_ClearBusyFlagErrata_2_14_7(I2C_HandleTypeDef *hi2c) {
     if (resetTried == 1) {
         return ;
     }
-    uint32_t SDA_PIN = NUCLEO_I2C_EXPBD_SDA_PIN;
-    uint32_t SCL_PIN = NUCLEO_I2C_EXPBD_SCL_PIN;
+    uint32_t SDA_PIN = I2C_BUS_SDA_Pin;
+    uint32_t SCL_PIN = I2C_BUS_SCL_Pin;
     GPIO_InitTypeDef GPIO_InitStruct;
 
     // 1
@@ -612,66 +612,66 @@ void HAL_I2C_ClearBusyFlagErrata_2_14_7(I2C_HandleTypeDef *hi2c) {
     GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    HAL_GPIO_WRITE_ODR(GPIOB, SDA_PIN);
-    HAL_GPIO_WRITE_ODR(GPIOB, SCL_PIN);
+    HAL_GPIO_WRITE_ODR(I2C_BUS_SDA_GPIO_Port, SDA_PIN);
+    HAL_GPIO_WRITE_ODR(I2C_BUS_SCL_GPIO_Port, SCL_PIN);
 
     // 3
     GPIO_PinState pinState;
-    if (HAL_GPIO_ReadPin(GPIOB, SDA_PIN) == GPIO_PIN_RESET) {
+    if (HAL_GPIO_ReadPin(I2C_BUS_SDA_GPIO_Port, SDA_PIN) == GPIO_PIN_RESET) {
         for(;;){}
     }
-    if (HAL_GPIO_ReadPin(GPIOB, SCL_PIN) == GPIO_PIN_RESET) {
+    if (HAL_GPIO_ReadPin(I2C_BUS_SCL_GPIO_Port, SCL_PIN) == GPIO_PIN_RESET) {
         for(;;){}
     }
 
     // 4
     GPIO_InitStruct.Pin = SDA_PIN;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(I2C_BUS_SDA_GPIO_Port, &GPIO_InitStruct);
 
-    HAL_GPIO_TogglePin(GPIOB, SDA_PIN);
+    HAL_GPIO_TogglePin(I2C_BUS_SDA_GPIO_Port, SDA_PIN);
 
     // 5
-    if (HAL_GPIO_ReadPin(GPIOB, SDA_PIN) == GPIO_PIN_SET) {
+    if (HAL_GPIO_ReadPin(I2C_BUS_SDA_GPIO_Port, SDA_PIN) == GPIO_PIN_SET) {
         for(;;){}
     }
 
     // 6
     GPIO_InitStruct.Pin = SCL_PIN;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(I2C_BUS_SCL_GPIO_Port, &GPIO_InitStruct);
 
-    HAL_GPIO_TogglePin(GPIOB, SCL_PIN);
+    HAL_GPIO_TogglePin(I2C_BUS_SCL_GPIO_Port, SCL_PIN);
 
     // 7
-    if (HAL_GPIO_ReadPin(GPIOB, SCL_PIN) == GPIO_PIN_SET) {
+    if (HAL_GPIO_ReadPin(I2C_BUS_SCL_GPIO_Port, SCL_PIN) == GPIO_PIN_SET) {
         for(;;){}
     }
 
     // 8
     GPIO_InitStruct.Pin = SDA_PIN;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(I2C_BUS_SDA_GPIO_Port, &GPIO_InitStruct);
 
-    HAL_GPIO_WRITE_ODR(GPIOB, SDA_PIN);
+    HAL_GPIO_WRITE_ODR(I2C_BUS_SDA_GPIO_Port, SDA_PIN);
 
     // 9
-    if (HAL_GPIO_ReadPin(GPIOB, SDA_PIN) == GPIO_PIN_RESET) {
+    if (HAL_GPIO_ReadPin(I2C_BUS_SDA_GPIO_Port, SDA_PIN) == GPIO_PIN_RESET) {
         for(;;){}
     }
 
     // 10
     GPIO_InitStruct.Pin = SCL_PIN;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(I2C_BUS_SCL_GPIO_Port, &GPIO_InitStruct);
 
-    HAL_GPIO_WRITE_ODR(GPIOB, SCL_PIN);
+    HAL_GPIO_WRITE_ODR(I2C_BUS_SCL_GPIO_Port, SCL_PIN);
 
     // 11
-    if (HAL_GPIO_ReadPin(GPIOB, SCL_PIN) == GPIO_PIN_RESET) {
+    if (HAL_GPIO_ReadPin(I2C_BUS_SCL_GPIO_Port, SCL_PIN) == GPIO_PIN_RESET) {
         for(;;){}
     }
 
     // 12
     GPIO_InitStruct.Pin = SDA_PIN|SCL_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-    GPIO_InitStruct.Alternate = NUCLEO_I2C_EXPBD_SCL_SDA_AF;
+    GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
    // 13

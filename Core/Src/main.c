@@ -114,7 +114,7 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
-  setup();
+  setup(&hi2c1);
   /* USER CODE END 2 */
 
   /* Infinite loop */

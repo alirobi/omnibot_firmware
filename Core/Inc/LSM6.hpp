@@ -100,7 +100,7 @@ extern "C" {
 			uint8_t lastStatus;
 
 			LSM6(void);
-			bool init(deviceType device = deviceAuto, sa0State sa0 = sa0Auto);
+			bool init(deviceType device = deviceAuto, sa0State sa0 = sa0Auto, I2C_HandleTypeDef * hi2c_ptr_in = (I2C_HandleTypeDef *)0);
 			deviceType getDeviceType(void){
 				return _device;
 			}
@@ -125,7 +125,7 @@ extern "C" {
 			uint16_t io_timeout;
 			bool did_timeout;
 			int16_t testReg(uint8_t address, regAddr reg);
-			I2C_HandleTypeDef hi2c1;
+			I2C_HandleTypeDef * hi2c_ptr;
 	};
 
 #ifdef __cplusplus

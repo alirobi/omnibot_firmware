@@ -12,7 +12,9 @@
 extern "C" {
 #endif
 
-void setup(void);
+#include "stm32f4xx_hal.h"
+
+void setup(I2C_HandleTypeDef * hi2c_ptr_in);
 
 void loop(void);
 

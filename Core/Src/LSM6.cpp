@@ -40,7 +40,8 @@ uint16_t LSM6::getTimeout(){
 	return io_timeout;
 }
 
-bool LSM6::init(deviceType device, sa0State sa0){
+bool LSM6::init(deviceType device, sa0State sa0, I2C_HandleTypeDef * hi2c_ptr_in){
+	hi2c_ptr = hi2c_ptr_in;
 	if(device == deviceAuto || sa0 == sa0Auto){
 		if(device == deviceAuto || device == deviceDS33){
 			if(sa0 != sa0Low && testReg(DS33_SA0_HIGH_ADDRESS, WHO_AM_I) == DS33_WHO_ID){
@@ -97,13 +98,13 @@ void LSM6::writeReg(uint8_t reg, uint8_t value){
 	uint8_t data[2];
 	data[0] = reg;
 	data[1] = value;
-	HAL_I2C_Master_Transmit(&hi2c1, LSM6_ADDRESS, data, 2, HAL_MAX_DELAY);
-//	HAL_I2C_Master_Transmit(&hi2c1, LSM6_ADDRESS, value, 1, io_timeout);
+	HAL_I2C_Master_Transmit(hi2c_ptr, LSM6_ADDRESS, data, 2, HAL_MAX_DELAY);
+//	HAL_I2C_Master_Transmit(hi2c_ptr, LSM6_ADDRESS, value, 1, io_timeout);
 	//unsure about io_timeout and 3
 //HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 
 //	HAL_StatusTypeDef status = HAL_OK;
-//	status = HAL_I2C_Mem_Write(&hi2c1, address, (uint8_t)hi2c1.Init.OwnAddress1, reg, (uint8_t*)(&value), 3, io_timeout);
+//	status = HAL_I2C_Mem_Write(hi2c_ptr, address, (uint8_t)hi2c_ptr->Init.OwnAddress1, reg, (uint8_t*)(&value), 3, io_timeout);
 	//HAL_I2C_Mem_Write(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 //	if(status != HAL_OK){
 		// err handling
@@ -123,18 +124,18 @@ uint8_t LSM6::readReg(uint8_t reg, uint8_t* buff){
 //	uint8_t *p = buff;
 //	*p = OUTX_L_XL;
 //	buff[0] = reg;
-	HAL_I2C_Master_Transmit(&hi2c1, LSM6_ADDRESS, &reg, 1, 10);
-//	HAL_I2C_Master_Receive(&hi2c1, LSM6_ADDRESS, buff, 1, 100);
+	HAL_I2C_Master_Transmit(hi2c_ptr, LSM6_ADDRESS, &reg, 1, 10);
+//	HAL_I2C_Master_Receive(hi2c_ptr, LSM6_ADDRESS, buff, 1, 100);
 
 //	uint8_t value = 0;
-//	HAL_StatusTypeDef status = HAL_I2C_Mem_Read(&hi2c1, LSM6_ADDRESS, (uint16_t)reg, 1, buff, 1, HAL_MAX_DELAY);
+//	HAL_StatusTypeDef status = HAL_I2C_Mem_Read(hi2c_ptr, LSM6_ADDRESS, (uint16_t)reg, 1, buff, 1, HAL_MAX_DELAY);
 ////	HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 //	return value;
 
 //	uint8_t* p;
 //	*p = 0;
 	HAL_StatusTypeDef status = HAL_OK;
-	status = HAL_I2C_Master_Receive(&hi2c1, LSM6_ADDRESS, buff, 1, 10);
+	status = HAL_I2C_Master_Receive(hi2c_ptr, LSM6_ADDRESS, buff, 1, 10);
 	//	HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 	if(status == HAL_OK){
 	}
@@ -154,11 +155,11 @@ void LSM6::readAcc(void){
 	buff[3] = OUTY_H_XL;
 	buff[4] = OUTZ_L_XL;
 	buff[5] = OUTZ_H_XL;
-	HAL_I2C_Master_Transmit(&hi2c1, LSM6_ADDRESS << 1, buff, 1, HAL_MAX_DELAY);
-	HAL_I2C_Master_Receive(&hi2c1, LSM6_ADDRESS << 1, buff, 6, HAL_MAX_DELAY);
-//	HAL_I2C_Mem_Read(&hi2c1, address, OUTX_L_XL, (uint8_t)1, &value, (uint8_t)6, io_timeout);
+	HAL_I2C_Master_Transmit(hi2c_ptr, LSM6_ADDRESS << 1, buff, 1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(hi2c_ptr, LSM6_ADDRESS << 1, buff, 6, HAL_MAX_DELAY);
+//	HAL_I2C_Mem_Read(hi2c_ptr, address, OUTX_L_XL, (uint8_t)1, &value, (uint8_t)6, io_timeout);
 	uint16_t millis_start = HAL_GetTick();
-	while(hi2c1.XferSize < 6){
+	while(hi2c_ptr->XferSize < 6){
 		if(io_timeout > 0 && ((uint16_t)HAL_GetTick() - millis_start) > io_timeout){
 			did_timeout = true;
 			return;
@@ -190,11 +191,11 @@ void LSM6::readGyro(void){
 //	buff2[3] = OUTY_H_G;
 //	buff2[4] = OUTZ_L_G;
 //	buff2[5] = OUTZ_H_G;
-	HAL_I2C_Master_Transmit(&hi2c1, LSM6_ADDRESS , buff2, 1, HAL_MAX_DELAY);
-	HAL_I2C_Master_Receive(&hi2c1, LSM6_ADDRESS , buff2, 6, HAL_MAX_DELAY);
-//	HAL_I2C_Mem_Read(&hi2c1, address, OUTX_L_G, (uint8_t)1, &value, (uint8_t)6, io_timeout);
+	HAL_I2C_Master_Transmit(hi2c_ptr, LSM6_ADDRESS , buff2, 1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(hi2c_ptr, LSM6_ADDRESS , buff2, 6, HAL_MAX_DELAY);
+//	HAL_I2C_Mem_Read(hi2c_ptr, address, OUTX_L_G, (uint8_t)1, &value, (uint8_t)6, io_timeout);
 	uint16_t millis_start = HAL_GetTick();
-	while(hi2c1.XferSize < 6){
+	while(hi2c_ptr->XferSize < 6){
 		if(io_timeout > 0 && ((uint16_t)HAL_GetTick() - millis_start) > io_timeout){
 			did_timeout = true;
 			return;

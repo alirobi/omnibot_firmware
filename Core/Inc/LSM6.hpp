@@ -5,15 +5,15 @@
  *      Author: Ali
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef INC_LSM6_HPP_
 #define INC_LSM6_HPP_
 
 #include "stm32f4xx_hal.h"
 #include <stm32_hal_legacy.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 	class LSM6
 	{

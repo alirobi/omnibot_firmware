@@ -32,6 +32,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -103,12 +104,10 @@ void Error_Handler(void);
 #define PRIMARY_SPI_BUS_MOSI_GPIO_Port GPIOC
 #define MOTOR_B_ENC_PHB_Pin GPIO_PIN_3
 #define MOTOR_B_ENC_PHB_GPIO_Port GPIOB
-#define I2C_BUS_SDA_Pin GPIO_PIN_7
-#define I2C_BUS_SDA_GPIO_Port GPIOB
 #define I2C_BUS_SCL_Pin GPIO_PIN_8
 #define I2C_BUS_SCL_GPIO_Port GPIOB
-#define letstrythis_Pin GPIO_PIN_9
-#define letstrythis_GPIO_Port GPIOB
+#define I2C_BUS_SDA_Pin GPIO_PIN_9
+#define I2C_BUS_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

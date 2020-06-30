@@ -74,22 +74,9 @@ bool LSM6::init(deviceType device, sa0State sa0, I2C_HandleTypeDef * hi2c_ptr_in
 }
 
 void LSM6::enableDefault(void){
-//	__HAL_DBGMCU_FREEZE_I2C1_TIMEOUT();
-//	if(_device == deviceDS33){
-		//Accelerometer
-		// 0x80 = 0b10000000
-		// ODR = 1000 (1.66 kHz (high performance)); FS_XL = 00 (+/-2 g full scale)
-		writeReg(CTRL1_XL, 0x80);
-		//Gyro
-		// 0x80 = 0b010000000
-		// ODR = 1000 (1.66 kHz (high performance)); FS_XL = 00 (245 dps)
-		writeReg(CTRL2_G, 0x80);
-		//Common
-		// 0x04 = 0b00000100
-		// IF_INC = 1 (automatically increment register address)
-		writeReg(CTRL3_C, 0x04);
-//	}
-//		__HAL_DBGMCU_UNFREEZE_I2C1_TIMEOUT();
+	writeReg(CTRL1_XL, 0x80);
+	writeReg(CTRL2_G, 0x80);
+	writeReg(CTRL3_C, 0x04);
 }
 
 void LSM6::writeReg(uint8_t reg, uint8_t value){

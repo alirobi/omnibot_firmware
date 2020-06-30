@@ -115,6 +115,7 @@ int main(void)
   MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
   setup(&hi2c1);
+  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -246,7 +247,7 @@ static void MX_I2C1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN I2C1_Init 2 */
-  HAL_I2C_ClearBusyFlagErrata_2_14_7(&hi2c1);
+//  HAL_I2C_ClearBusyFlagErrata_2_14_7(&hi2c1);
   /* USER CODE END I2C1_Init 2 */
 
 }
@@ -560,12 +561,22 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_RESET);
+
   /*Configure GPIO pins : MOTOR_C_ARM_Pin MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin */
   GPIO_InitStruct.Pin = MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : TEST_PIN_Pin */
+  GPIO_InitStruct.Pin = TEST_PIN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(TEST_PIN_GPIO_Port, &GPIO_InitStruct);
 
 }
 

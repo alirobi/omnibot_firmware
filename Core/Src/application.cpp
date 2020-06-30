@@ -29,6 +29,7 @@ void loop(void) {
 	uint8_t val2 = IMU.readReg(LSM6::CTRL2_G, buff);
 	uint8_t val3 = IMU.readReg(LSM6::CTRL3_C, buff);
 	IMU.readAcc();
+	IMU.readGyro();
 }
 
 #ifdef __cplusplus

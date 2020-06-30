@@ -107,28 +107,16 @@ uint8_t LSM6::readReg(uint8_t reg, uint8_t* buff){
 }
 
 void LSM6::readAcc(void){
-//	Wire.beginTransmission(address);
-//	Wire.write(OUTX_L_XL);
-//	Wire.endTransmission();
-//	Wire.requestFrom(address, (uint8_t)6);
 	uint8_t buff[6] = {0};
-//	uint8_t *p = buff;
-//	*p = OUTX_L_XL;
-	buff[1] = OUTX_H_XL;
-	buff[2] = OUTY_L_XL;
-	buff[3] = OUTY_H_XL;
-	buff[4] = OUTZ_L_XL;
-	buff[5] = OUTZ_H_XL;
-	HAL_I2C_Master_Transmit(hi2c_ptr, LSM6_ADDRESS << 1, buff, 1, HAL_MAX_DELAY);
-	HAL_I2C_Master_Receive(hi2c_ptr, LSM6_ADDRESS << 1, buff, 6, HAL_MAX_DELAY);
-//	HAL_I2C_Mem_Read(hi2c_ptr, address, OUTX_L_XL, (uint8_t)1, &value, (uint8_t)6, io_timeout);
-	uint16_t millis_start = HAL_GetTick();
-	while(hi2c_ptr->XferSize < 6){
-		if(io_timeout > 0 && ((uint16_t)HAL_GetTick() - millis_start) > io_timeout){
-			did_timeout = true;
-			return;
-		}
-	}
+
+	HAL_I2C_Mem_Read(hi2c_ptr, (uint8_t)(LSM6_ADDRESS<<1), OUTX_L_XL, I2C_MEMADD_SIZE_8BIT, buff, (uint8_t)6, 100);
+//	uint16_t millis_start = HAL_GetTick();
+//	while(hi2c_ptr->XferSize < 6){
+//		if(io_timeout > 0 && ((uint16_t)HAL_GetTick() - millis_start) > io_timeout){
+//			did_timeout = true;
+//			return;
+//		}
+//	}
 	uint8_t xla = buff[0];
 	uint8_t xha = buff[1];
 	uint8_t yla = buff[2];

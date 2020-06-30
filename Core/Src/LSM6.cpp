@@ -93,57 +93,17 @@ void LSM6::enableDefault(void){
 }
 
 void LSM6::writeReg(uint8_t reg, uint8_t value){
-//	Wire.beginTransmission(address);
-//	Wire.write(reg);
-//	Wire.write(value);
-//	last_status = Wire.endTransmission();
-
-//	uint8_t data[2];
-//	data[0] = reg;
-//	data[1] = value;
-//	HAL_I2C_Master_Transmit(hi2c_ptr, (uint8_t)(LSM6_ADDRESS<<1), data, 2, HAL_MAX_DELAY);
-//	HAL_I2C_Master_Transmit(hi2c_ptr, LSM6_ADDRESS, value, 1, io_timeout);
-	//unsure about io_timeout and 3
-//HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 
 	HAL_StatusTypeDef status = HAL_OK;
 	status = HAL_I2C_Mem_Write(hi2c_ptr, (uint8_t)(LSM6_ADDRESS<<1), reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)(&value), 1, 100);
-	//HAL_I2C_Mem_Write(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
-	if(status == HAL_OK){
-		HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
-//		while(1){}
-	}
 }
 
 uint8_t LSM6::readReg(uint8_t reg, uint8_t* buff){
-//	uint8_t value;
-//	Wire.beginTransmission(address);
-//	Wire.write(reg);
-//	last_status = Wire.endTransmission();
-//	Wire.requestFrom(address, (uint8_t)1);
-//	value = Wire.read();
-//	Wire.endTransmission();
 
-//	uint8_t buff[1] = {0};
-//	uint8_t *p = buff;
-//	*p = OUTX_L_XL;
-//	buff[0] = reg;
-	HAL_I2C_Master_Transmit(hi2c_ptr, (uint8_t)(LSM6_ADDRESS<<1), &reg, 1, 10);
-//	HAL_I2C_Master_Receive(hi2c_ptr, LSM6_ADDRESS, buff, 1, 100);
-
-//	uint8_t value = 0;
-//	HAL_StatusTypeDef status = HAL_I2C_Mem_Read(hi2c_ptr, LSM6_ADDRESS, (uint16_t)reg, 1, buff, 1, HAL_MAX_DELAY);
-////	HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
-//	return value;
-
-//	uint8_t* p;
-//	*p = 0;
-	HAL_StatusTypeDef status = HAL_OK;
-	status = HAL_I2C_Master_Receive(hi2c_ptr, (uint8_t)(LSM6_ADDRESS<<1), buff, 1, 10);
-	//	HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
+	HAL_StatusTypeDef status = HAL_I2C_Mem_Read(hi2c_ptr, (uint8_t)(LSM6_ADDRESS<<1), reg, I2C_MEMADD_SIZE_8BIT, buff, 1, 100);
 	if(status == HAL_OK){
 	}
-	return status;
+	return buff[0];
 }
 
 void LSM6::readAcc(void){

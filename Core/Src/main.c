@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <application.hpp>
+#include <Timer.hpp>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -115,6 +116,7 @@ int main(void)
   MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
   setup();
+  TIM_Init(TIM1);
   /* USER CODE END 2 */
 
   /* Infinite loop */

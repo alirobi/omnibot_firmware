@@ -10,6 +10,7 @@
 #include <stm32f4xx_hal_i2c_ex.h>
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_def.h>
+#include <main.h>
 //#include <Wire.h>
 //#include <SoftWire.h>
 
@@ -18,7 +19,7 @@
 #define DS33_SA0_LOW_ADDRESS 0b1101010
 #define TEST_REG_ERROR -1
 #define DS33_WHO_ID 0X69
-#define LSM6_ADDRESS 0b1101010
+#define LSM6_ADDRESS 0b1101011
 
 LSM6::LSM6(void){
 	_device = deviceAuto;
@@ -105,13 +106,13 @@ void LSM6::writeReg(uint8_t reg, uint8_t value){
 	//unsure about io_timeout and 3
 //HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 
-//	HAL_StatusTypeDef status = HAL_OK;
-//	status =
-	HAL_I2C_Mem_Write(hi2c_ptr, LSM6_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)(&value), 2, 100);
+	HAL_StatusTypeDef status = HAL_OK;
+	status = HAL_I2C_Mem_Write(hi2c_ptr, (uint8_t)(LSM6_ADDRESS<<1), reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)(&value), 1, 100);
 	//HAL_I2C_Mem_Write(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
-//	if(status != HAL_OK){
-		// err handling
-//	}
+	if(status == HAL_OK){
+		HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+//		while(1){}
+	}
 }
 
 uint8_t LSM6::readReg(uint8_t reg, uint8_t* buff){

@@ -284,7 +284,7 @@ static void MX_SPI3_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN SPI3_Init 2 */
-
+  __HAL_SPI_ENABLE_IT(&hspi3, SPI_IT_RXNE);
   /* USER CODE END SPI3_Init 2 */
 
 }

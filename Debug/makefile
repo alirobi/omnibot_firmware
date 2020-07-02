@@ -55,8 +55,8 @@ omnibot2.bin \
 all: omnibot2.elf secondary-outputs
 
 # Tool invocations
-omnibot2.elf: $(OBJS) $(USER_OBJS) D:\Users\Karthik\STM32CubeIDE\workspace_1.3.0\omnibot2\STM32F411RETX_FLASH.ld
-	arm-none-eabi-g++ -o "omnibot2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Users\Karthik\STM32CubeIDE\workspace_1.3.0\omnibot2\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="omnibot2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+omnibot2.elf: $(OBJS) $(USER_OBJS) /Users/pike/Downloads/omnibot_firmware/STM32F411RETX_FLASH.ld
+	arm-none-eabi-g++ -o "omnibot2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/pike/Downloads/omnibot_firmware/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="omnibot2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

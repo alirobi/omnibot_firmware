@@ -55,6 +55,7 @@ TIM_HandleTypeDef htim9;
 
 /* USER CODE BEGIN PV */
 
+uint8_t buff[12];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -115,14 +116,15 @@ int main(void)
   MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
   setup(&hi2c1);
-  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
+//  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	loop();
+//	loop();
+	  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -284,7 +286,9 @@ static void MX_SPI3_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN SPI3_Init 2 */
-  __HAL_SPI_ENABLE_IT(&hspi3, SPI_IT_RXNE);
+//  __HAL_SPI_ENABLE_IT(&hspi3, SPI_IT_RXNE);
+  HAL_SPI_Receive_IT(&hspi3, buff, 12);
+
   /* USER CODE END SPI3_Init 2 */
 
 }

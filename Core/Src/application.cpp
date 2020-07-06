@@ -14,17 +14,16 @@ extern "C" {
 #include "main.h"
 
 LSM6 IMU;
-I2C_HandleTypeDef * hi2c_ptr;
+APP_HandleTypeDef * ptr_hOmnibotApp;
 
-void setup(I2C_HandleTypeDef * hi2c_ptr_in) {
-	hi2c_ptr = hi2c_ptr_in;
+void setup(APP_HandleTypeDef * hOmnibotApp_in) {
+	ptr_hOmnibotApp = hOmnibotApp_in;
+	IMU.init(LSM6::deviceAuto, LSM6::sa0Auto, ptr_hOmnibotApp->hi2c1);
+	IMU.enableDefault();
 }
 
 void loop(void) {
-	//
 	uint8_t buff[12];
-	IMU.init(LSM6::deviceAuto, LSM6::sa0Auto, hi2c_ptr);
-	IMU.enableDefault();
 	uint8_t val = IMU.readReg(LSM6::CTRL1_XL, buff);
 	uint8_t val2 = IMU.readReg(LSM6::CTRL2_G, buff);
 	uint8_t val3 = IMU.readReg(LSM6::CTRL3_C, buff);

@@ -56,6 +56,8 @@ TIM_HandleTypeDef htim9;
 /* USER CODE BEGIN PV */
 
 uint8_t buff[12];
+
+APP_HandleTypeDef hOmnibotApp = {&hadc1, &hi2c1, &hspi3, &htim1, &htim2, &htim3, &htim5, &htim9};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -115,15 +117,17 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
-  setup(&hi2c1);
-//  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
+
+  setup(&hOmnibotApp);
+
+  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	loop();
+	  loop();
 	  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
     /* USER CODE END WHILE */
 
@@ -249,7 +253,7 @@ static void MX_I2C1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN I2C1_Init 2 */
-//  HAL_I2C_ClearBusyFlagErrata_2_14_7(&hi2c1);
+
   /* USER CODE END I2C1_Init 2 */
 
 }
@@ -286,7 +290,6 @@ static void MX_SPI3_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN SPI3_Init 2 */
-//  __HAL_SPI_ENABLE_IT(&hspi3, SPI_IT_RXNE);
   HAL_SPI_Receive_IT(&hspi3, buff, 12);
 
   /* USER CODE END SPI3_Init 2 */

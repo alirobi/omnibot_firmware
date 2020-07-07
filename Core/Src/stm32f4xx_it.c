@@ -58,6 +58,7 @@
 /* External variables --------------------------------------------------------*/
 extern SPI_HandleTypeDef hspi3;
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim4;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -227,6 +228,20 @@ void TIM1_CC_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles TIM4 global interrupt.
+  */
+void TIM4_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM4_IRQn 0 */
+
+  /* USER CODE END TIM4_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim4);
+  /* USER CODE BEGIN TIM4_IRQn 1 */
+  HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+  /* USER CODE END TIM4_IRQn 1 */
+}
+
+/**
   * @brief This function handles SPI3 global interrupt.
   */
 void SPI3_IRQHandler(void)
@@ -236,7 +251,7 @@ void SPI3_IRQHandler(void)
   /* USER CODE END SPI3_IRQn 0 */
   HAL_SPI_IRQHandler(&hspi3);
   /* USER CODE BEGIN SPI3_IRQn 1 */
-  HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+//  HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
   /* USER CODE END SPI3_IRQn 1 */
 }
 

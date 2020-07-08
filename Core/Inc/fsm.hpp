@@ -12,7 +12,6 @@
 extern "C" {
 #endif
 
-#include "main.h"
 #include "stm32f4xx_hal.h"
 
 #define INVALID_TRANS false
@@ -38,6 +37,9 @@ public:
 
 private:
     fsmState_t _curState;
+    bool _busy = false;
+
+    uint16_t _duty = 250;
 
     void fsmDisable(void);
     void fsmCoreStartup(void);

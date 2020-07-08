@@ -56,8 +56,6 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-void HAL_I2C_ClearBusyFlagErrata_2_14_7(I2C_HandleTypeDef *hi2c);
-void HAL_GPIO_WRITE_ODR(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 
 /* USER CODE END EFP */
 
@@ -114,6 +112,21 @@ void HAL_GPIO_WRITE_ODR(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 #define I2C_BUS_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 #define PRIMARY_SPI_BUS_DATA_SIZE_BYTES 50
+
+#define MOTOR_A_CMD1_TIMER &htim3
+#define MOTOR_A_CMD1_CHANNEL TIM_CHANNEL_1
+#define MOTOR_A_CMD2_TIMER &htim3
+#define MOTOR_A_CMD2_CHANNEL TIM_CHANNEL_2
+
+#define MOTOR_B_CMD1_TIMER &htim3
+#define MOTOR_B_CMD1_CHANNEL TIM_CHANNEL_3
+#define MOTOR_B_CMD2_TIMER &htim3
+#define MOTOR_B_CMD2_CHANNEL TIM_CHANNEL_4
+
+#define MOTOR_C_CMD1_TIMER &htim9
+#define MOTOR_C_CMD1_CHANNEL TIM_CHANNEL_1
+#define MOTOR_C_CMD2_TIMER &htim9
+#define MOTOR_C_CMD2_CHANNEL TIM_CHANNEL_2
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

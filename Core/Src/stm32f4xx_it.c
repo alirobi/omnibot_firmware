@@ -239,6 +239,7 @@ void TIM4_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim4);
   /* USER CODE BEGIN TIM4_IRQn 1 */
   HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+  interruptLink(TIM4_IT);
   /* USER CODE END TIM4_IRQn 1 */
 }
 
@@ -252,6 +253,7 @@ void SPI3_IRQHandler(void)
   /* USER CODE END SPI3_IRQn 0 */
   HAL_SPI_IRQHandler(&hspi3);
   /* USER CODE BEGIN SPI3_IRQn 1 */
+  interruptLink(SPI3_IT);
 //  HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
   /* USER CODE END SPI3_IRQn 1 */
 }

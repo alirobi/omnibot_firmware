@@ -57,8 +57,6 @@ TIM_HandleTypeDef htim9;
 /* USER CODE BEGIN PV */
 
 uint8_t buff[12];
-
-APP_HandleTypeDef hOmnibotApp = {&hadc1, &hi2c1, &hspi3, &htim1, &htim2, &htim3, &htim4, &htim5, &htim9};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -121,7 +119,7 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
-  setup(&hOmnibotApp);
+  setup();
 
   /* USER CODE END 2 */
 

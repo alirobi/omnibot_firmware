@@ -5,12 +5,12 @@
  *      Author: Ali
  */
 
-#include <LSM6.hpp>
+#include "LSM6.hpp"
 #include <math.h>
 #include <stm32f4xx_hal_i2c_ex.h>
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_def.h>
-#include <main.h>
+#include "main.h"
 //#include <Wire.h>
 //#include <SoftWire.h>
 

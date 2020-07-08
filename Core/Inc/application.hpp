@@ -14,9 +14,16 @@ extern "C" {
 
 #include "stm32f4xx_hal.h"
 
+typedef enum {
+	SPI3_IT,
+	TIM4_IT
+} interruptLink_t;
+
 void setup(void);
 
 void loop(void);
+
+void interruptLink(interruptLink_t it);
 
 void fsmRun(void);
 

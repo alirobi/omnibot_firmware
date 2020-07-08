@@ -9,8 +9,9 @@
 extern "C" {
 #endif
 
-#include <application.hpp>
-#include <LSM6.hpp>
+#include "application.hpp"
+#include "LSM6.hpp"
+#include "fsm.hpp"
 #include "main.h"
 
 extern ADC_HandleTypeDef hadc1;
@@ -26,7 +27,11 @@ extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim9;
 
+extern uint8_t spi_data[PRIMARY_SPI_BUS_DATA_SIZE_BYTES];
+
 LSM6 IMU;
+
+FSM OmnibotFSM;
 
 void setup(void) {
 
@@ -41,6 +46,21 @@ void setup(void) {
 void loop(void) {
 	IMU.readAcc();
 	IMU.readGyro();
+}
+
+void interruptLink(interruptLink_t it) {
+	switch(it) {
+	case SPI3_IT:
+		// DO SOMETHING WITH spi_data
+		// reset interrupt to top of buffer
+		HAL_SPI_Receive_IT(&hspi3, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
+		break;
+	case TIM4_IT:
+		OmnibotFSM.fsmRun();
+		break;
+	default:
+		break;
+	}
 }
 
 void fsmRun(void) {

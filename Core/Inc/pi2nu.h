@@ -2,7 +2,7 @@
 //#include<stdlib.h>
 
 struct pi2nu{
-    // Total 13 bytes
+    // Total 42 bytes
     // 8 bit integer to represent speed of each wheel
     // 0 for stop
     // + 127 max CCW
@@ -13,15 +13,18 @@ struct pi2nu{
     int8_t vel_c;
     // Error code(State)
     int8_t error;
-    int8_t dummy[8];
+    int8_t dummy[36];
+    int8_t checkSum;
 };
 
 struct PID{
-    // 13 bytes
+    // 42 bytes
     int8_t header;
     float pGain;
     float iGain;
     float dGain;
+    int8_t dummy[28];
+    int8_t checkSum;
 };
 
 

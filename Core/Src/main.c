@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <application.hpp>
+#include <pi2nu.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,7 +56,8 @@ TIM_HandleTypeDef htim9;
 
 /* USER CODE BEGIN PV */
 
-uint8_t buff[12];
+uint8_t buff[42];
+struct pi2nu *msg;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -287,7 +289,13 @@ static void MX_SPI3_Init(void)
   }
   /* USER CODE BEGIN SPI3_Init 2 */
 //  __HAL_SPI_ENABLE_IT(&hspi3, SPI_IT_RXNE);
-  HAL_SPI_Receive_IT(&hspi3, buff, 12);
+  HAL_SPI_Receive_IT(&hspi3, buff, 42);
+  msg = &buff;
+//  msg->vel_a ++;
+//  msg->vel_b ++;
+//  msg->vel_c ++;
+//  msg->header ++;
+//  HAL_SPI_Transmit(&hspi3, msg, 2, HAL_TIMEOUT);
 
   /* USER CODE END SPI3_Init 2 */
 

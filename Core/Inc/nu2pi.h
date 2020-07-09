@@ -1,5 +1,5 @@
 struct nu2pi{
-    // Total 41 bytes
+    // Total 42 bytes
     // a_delta, b_delta, c_delta represent encoder tick change.
     int8_t a_delta;
     int8_t b_delta;
@@ -14,4 +14,6 @@ struct nu2pi{
     int8_t batt;
     // Error Code
     int8_t error;
+
+    int8_t checkSum;
 };

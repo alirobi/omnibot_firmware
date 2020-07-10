@@ -54,6 +54,8 @@ TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim9;
 
+UART_HandleTypeDef huart2;
+
 /* USER CODE BEGIN PV */
 
 uint8_t spi_data[PRIMARY_SPI_BUS_DATA_SIZE_BYTES];
@@ -71,6 +73,7 @@ static void MX_TIM5_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM9_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -117,6 +120,7 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM9_Init();
   MX_TIM4_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   setup();
@@ -603,6 +607,39 @@ static void MX_TIM9_Init(void)
 }
 
 /**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -617,13 +654,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, MOTOR_C_ARM_Pin|MOTOR_A_ARM2_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, MOTOR_C_ARM_Pin|GPIO_PIN_0|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : MOTOR_C_ARM_Pin MOTOR_A_ARM2_Pin MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin */
-  GPIO_InitStruct.Pin = MOTOR_C_ARM_Pin|MOTOR_A_ARM2_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin;
+  /*Configure GPIO pins : MOTOR_C_ARM_Pin PC0 MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin */
+  GPIO_InitStruct.Pin = MOTOR_C_ARM_Pin|GPIO_PIN_0|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

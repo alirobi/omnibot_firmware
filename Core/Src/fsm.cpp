@@ -23,8 +23,21 @@ extern TIM_HandleTypeDef htim9;
 
 extern uint8_t spi_data[PRIMARY_SPI_BUS_DATA_SIZE_BYTES];
 
+/**
+  * @brief  FSM constructor. Sets state to disabled
+  * @note
+  * @param  none
+  * @retval none
+  */
 FSM::FSM(void) : _curState{DISABLED} {}
 
+
+/**
+  * @brief  Runs the FSM for one step
+  * @note
+  * @param  none
+  * @retval successful execution of FSM step
+  */
 bool FSM::fsmRun(void) {
 	if (_busy) return false;
 	_busy = true;
@@ -58,6 +71,13 @@ bool FSM::fsmRun(void) {
 	return true;
 }
 
+/**
+  * @brief  Transitions FSM state
+  * @note   Not all transitions are valid
+  * @note	DOES NOT trigger execution of FSM step
+  * @param  desired next state from @ref FSM::fsmState_t
+  * @retval valid state transition
+  */
 bool FSM::fsmTransition(fsmState_t nextState) {
     bool validity = INVALID_TRANS;
     switch(nextState) {
@@ -105,17 +125,36 @@ bool FSM::fsmTransition(fsmState_t nextState) {
 }
 
 //TODO: Implement these properly:
+
+/**
+  * @brief  Executes actions to be taken at every execution in the DISABLED state
+  * @note
+  * @param  none
+  * @retval none
+  */
 void FSM::fsmDisable(void) {
 	fsmTransition(CORE_STARTUP);
 }
+
+/**
+  * @brief  Executes core startup actions, such as MCU module initializations and startups
+  * @note
+  * @param  none
+  * @retval none
+  */
 void FSM::fsmCoreStartup(void) {
 
 	HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
+
+	// Start timer for timed interrupt for FSM task
 	HAL_TIM_Base_Start_IT(&htim9);
+
+	// Motor encoders ready to read
 	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL);
 
+	// Motor command PWM generation -- initialized at 0% duty cycle
 	HAL_TIM_PWM_Start(MOTOR_A_CMD1_TIMER, MOTOR_A_CMD1_CHANNEL);
 	HAL_TIM_PWM_Start(MOTOR_A_CMD2_TIMER, MOTOR_A_CMD2_CHANNEL);
 
@@ -125,21 +164,57 @@ void FSM::fsmCoreStartup(void) {
 	HAL_TIM_PWM_Start(MOTOR_C_CMD1_TIMER, MOTOR_C_CMD1_CHANNEL);
 	HAL_TIM_PWM_Start(MOTOR_C_CMD2_TIMER, MOTOR_C_CMD2_CHANNEL);
 
+	// Auto transition
 	fsmTransition(AUX_STARTUP);
 }
+
+/**
+  * @brief  Configures MCU and peripherals according to new config
+  * @note
+  * @param  none
+  * @retval none
+  */
 void FSM::fsmConfig(void) {
 
 }
+
+/**
+  * @brief  Executes actions to startup auxiliary devices (e.g., motor drivers)
+  * @note
+  * @param  none
+  * @retval none
+  */
 void FSM::fsmAuxStartup(void) {
 	fsmTransition(DRIVE);
 }
+
+/**
+  * @brief  Normal operation of MCU for application
+  * @note
+  * @param  none
+  * @retval none
+  */
 void FSM::fsmDrive(void) {
 	(&htim3)->Instance->CCR1 = _duty;
 	_duty = (_duty < 500) ? 900 : 100;
 }
+
+/**
+  * @brief  Executes actions necessary to safely stop operation of robot
+  * @note
+  * @param  none
+  * @retval none
+  */
 void FSM::fsmStop(void) {
 
 }
+
+/**
+  * @brief  Executes actions necessary to safely respond to faults
+  * @note
+  * @param  none
+  * @retval none
+  */
 void FSM::fsmFault(void) {
 
 }

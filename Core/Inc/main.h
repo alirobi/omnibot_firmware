@@ -62,8 +62,6 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define MOTOR_C_ARM_Pin GPIO_PIN_15
 #define MOTOR_C_ARM_GPIO_Port GPIOC
-#define MOTOR_A_ARM2_Pin GPIO_PIN_0
-#define MOTOR_A_ARM2_GPIO_Port GPIOC
 #define MOTOR_C_CURRENT_MONITOR_Pin GPIO_PIN_1
 #define MOTOR_C_CURRENT_MONITOR_GPIO_Port GPIOC
 #define MOTOR_A_ARM_Pin GPIO_PIN_2
@@ -74,8 +72,6 @@ void Error_Handler(void);
 #define MOTOR_C_ENC_PHA_GPIO_Port GPIOA
 #define MOTOR_C_ENC_PHB_Pin GPIO_PIN_1
 #define MOTOR_C_ENC_PHB_GPIO_Port GPIOA
-#define PRIMARY_SPI_BUS_CTRL_SEL_Pin GPIO_PIN_4
-#define PRIMARY_SPI_BUS_CTRL_SEL_GPIO_Port GPIOA
 #define MOTOR_B_ENC_PHA_Pin GPIO_PIN_5
 #define MOTOR_B_ENC_PHA_GPIO_Port GPIOA
 #define MOTOR_A_CMD1_Pin GPIO_PIN_6
@@ -96,6 +92,8 @@ void Error_Handler(void);
 #define MOTOR_A_ENC_PHA_GPIO_Port GPIOA
 #define MOTOR_A_ENC_PHB_Pin GPIO_PIN_9
 #define MOTOR_A_ENC_PHB_GPIO_Port GPIOA
+#define PRIMARY_SPI_BUS_CTRL_SEL_Pin GPIO_PIN_15
+#define PRIMARY_SPI_BUS_CTRL_SEL_GPIO_Port GPIOA
 #define PRIMARY_SPI_BUS_CLK_Pin GPIO_PIN_10
 #define PRIMARY_SPI_BUS_CLK_GPIO_Port GPIOC
 #define PRIMARY_SPI_BUS_MISO_Pin GPIO_PIN_11

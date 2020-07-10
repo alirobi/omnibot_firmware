@@ -33,6 +33,12 @@ LSM6 IMU;
 
 FSM OmnibotFSM;
 
+/**
+  * @brief  Executes general startup actions, such as initializing classes
+  * @note	NOT for use in initializing internal MCU modules. See @ref FSM::coreStartup()
+  * @param  none
+  * @retval none
+  */
 void setup(void) {
 
 	OmnibotFSM.fsmRun();
@@ -42,11 +48,23 @@ void setup(void) {
 	IMU.enableDefault();
 }
 
+/**
+  * @brief  Executes actions on an un-timed loop
+  * @note
+  * @param  none
+  * @retval none
+  */
 void loop(void) {
 	IMU.readAcc();
 	IMU.readGyro();
 }
 
+/**
+  * @brief  Called from Interrupt Service Routines (ISRs) running from @ref /Core/Src/stm32f4xx_it.c
+  * @note	Expand as necessary
+  * @param  none
+  * @retval none
+  */
 void interruptLink(interruptLink_t it) {
 	switch(it) {
 	case SPI3_IT:
@@ -55,15 +73,12 @@ void interruptLink(interruptLink_t it) {
 		HAL_SPI_Receive_IT(&hspi3, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
 		break;
 	case TIM9_IT:
+		// PRIMARY FSM TASK
 		OmnibotFSM.fsmRun();
 		break;
 	default:
 		break;
 	}
-}
-
-void fsmRun(void) {
-
 }
 
 #ifdef __cplusplus

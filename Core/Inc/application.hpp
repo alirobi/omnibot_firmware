@@ -25,8 +25,6 @@ void loop(void);
 
 void interruptLink(interruptLink_t it);
 
-void fsmRun(void);
-
 
 #ifdef __cplusplus
 }

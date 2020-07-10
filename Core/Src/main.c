@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include <application.hpp>
 #include <pi2nu.h>
+#include <nu2pi.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,12 +53,14 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim5;
-TIM_HandleTypeDef htim9;
+
+UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
-uint8_t buff[42];
 struct pi2nu *msg;
+int8_t buff[42];
+struct nu2pi msg2pi;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,7 +73,7 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_ADC1_Init(void);
-static void MX_TIM9_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -115,7 +118,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM5_Init();
   MX_ADC1_Init();
-  MX_TIM9_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   setup(&hi2c1);
 //  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
@@ -130,6 +133,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  char *msg = "Hello Nucleo Fun!\n\r";
+
+	  HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 0xFFFF);
   }
   /* USER CODE END 3 */
 }
@@ -289,13 +295,13 @@ static void MX_SPI3_Init(void)
   }
   /* USER CODE BEGIN SPI3_Init 2 */
 //  __HAL_SPI_ENABLE_IT(&hspi3, SPI_IT_RXNE);
-  HAL_SPI_Receive_IT(&hspi3, buff, 42);
+//  HAL_SPI_Receive_IT(&hspi3, &msg, 42);
+  msg2pi.a_delta = 10;
+  msg2pi.b_delta = 20;
+  msg2pi.c_delta = 30;
+  msg2pi.checkSum = 1;
   msg = &buff;
-//  msg->vel_a ++;
-//  msg->vel_b ++;
-//  msg->vel_c ++;
-//  msg->header ++;
-//  HAL_SPI_Transmit(&hspi3, msg, 2, HAL_TIMEOUT);
+  HAL_SPI_TransmitReceive_IT(&hspi3, &msg2pi, &buff, 42);
 
   /* USER CODE END SPI3_Init 2 */
 
@@ -511,48 +517,35 @@ static void MX_TIM5_Init(void)
 }
 
 /**
-  * @brief TIM9 Initialization Function
+  * @brief USART2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM9_Init(void)
+static void MX_USART2_UART_Init(void)
 {
 
-  /* USER CODE BEGIN TIM9_Init 0 */
+  /* USER CODE BEGIN USART2_Init 0 */
 
-  /* USER CODE END TIM9_Init 0 */
+  /* USER CODE END USART2_Init 0 */
 
-  TIM_OC_InitTypeDef sConfigOC = {0};
+  /* USER CODE BEGIN USART2_Init 1 */
 
-  /* USER CODE BEGIN TIM9_Init 1 */
-
-  /* USER CODE END TIM9_Init 1 */
-  htim9.Instance = TIM9;
-  htim9.Init.Prescaler = 0;
-  htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim9.Init.Period = 0;
-  htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim9.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_PWM_Init(&htim9) != HAL_OK)
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim9, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim9, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM9_Init 2 */
+  /* USER CODE BEGIN USART2_Init 2 */
 
-  /* USER CODE END TIM9_Init 2 */
-  HAL_TIM_MspPostInit(&htim9);
+  /* USER CODE END USART2_Init 2 */
 
 }
 
@@ -571,13 +564,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : MOTOR_C_ARM_Pin MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin */
-  GPIO_InitStruct.Pin = MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin;
+  /*Configure GPIO pins : PC15 MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_15|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

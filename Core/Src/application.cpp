@@ -35,8 +35,6 @@ FSM OmnibotFSM;
 
 void setup(void) {
 
-	HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
-
 	OmnibotFSM.fsmRun();
 	OmnibotFSM.fsmRun();
 
@@ -56,7 +54,7 @@ void interruptLink(interruptLink_t it) {
 		// reset interrupt to top of buffer
 		HAL_SPI_Receive_IT(&hspi3, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
 		break;
-	case TIM4_IT:
+	case TIM9_IT:
 		OmnibotFSM.fsmRun();
 		break;
 	default:

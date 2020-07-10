@@ -62,6 +62,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define MOTOR_C_ARM_Pin GPIO_PIN_15
 #define MOTOR_C_ARM_GPIO_Port GPIOC
+#define MOTOR_A_ARM2_Pin GPIO_PIN_0
+#define MOTOR_A_ARM2_GPIO_Port GPIOC
 #define MOTOR_C_CURRENT_MONITOR_Pin GPIO_PIN_1
 #define MOTOR_C_CURRENT_MONITOR_GPIO_Port GPIOC
 #define MOTOR_A_ARM_Pin GPIO_PIN_2
@@ -72,10 +74,6 @@ void Error_Handler(void);
 #define MOTOR_C_ENC_PHA_GPIO_Port GPIOA
 #define MOTOR_C_ENC_PHB_Pin GPIO_PIN_1
 #define MOTOR_C_ENC_PHB_GPIO_Port GPIOA
-#define MOTOR_C_CMD1_Pin GPIO_PIN_2
-#define MOTOR_C_CMD1_GPIO_Port GPIOA
-#define MOTOR_C_CMD2_Pin GPIO_PIN_3
-#define MOTOR_C_CMD2_GPIO_Port GPIOA
 #define PRIMARY_SPI_BUS_CTRL_SEL_Pin GPIO_PIN_4
 #define PRIMARY_SPI_BUS_CTRL_SEL_GPIO_Port GPIOA
 #define MOTOR_B_ENC_PHA_Pin GPIO_PIN_5
@@ -106,6 +104,10 @@ void Error_Handler(void);
 #define PRIMARY_SPI_BUS_MOSI_GPIO_Port GPIOC
 #define MOTOR_B_ENC_PHB_Pin GPIO_PIN_3
 #define MOTOR_B_ENC_PHB_GPIO_Port GPIOB
+#define MOTOR_C_CMD1_Pin GPIO_PIN_6
+#define MOTOR_C_CMD1_GPIO_Port GPIOB
+#define MOTOR_C_CMD2_Pin GPIO_PIN_7
+#define MOTOR_C_CMD2_GPIO_Port GPIOB
 #define I2C_BUS_SCL_Pin GPIO_PIN_8
 #define I2C_BUS_SCL_GPIO_Port GPIOB
 #define I2C_BUS_SDA_Pin GPIO_PIN_9
@@ -118,15 +120,22 @@ void Error_Handler(void);
 #define MOTOR_A_CMD2_TIMER &htim3
 #define MOTOR_A_CMD2_CHANNEL TIM_CHANNEL_2
 
+#define MOTOR_A_ENC_TIM TIM1
+
 #define MOTOR_B_CMD1_TIMER &htim3
 #define MOTOR_B_CMD1_CHANNEL TIM_CHANNEL_3
 #define MOTOR_B_CMD2_TIMER &htim3
 #define MOTOR_B_CMD2_CHANNEL TIM_CHANNEL_4
 
-#define MOTOR_C_CMD1_TIMER &htim9
+#define MOTOR_B_ENC_TIM TIM2
+
+#define MOTOR_C_CMD1_TIMER &htim4
 #define MOTOR_C_CMD1_CHANNEL TIM_CHANNEL_1
-#define MOTOR_C_CMD2_TIMER &htim9
+#define MOTOR_C_CMD2_TIMER &htim4
 #define MOTOR_C_CMD2_CHANNEL TIM_CHANNEL_2
+
+#define MOTOR_C_ENC_TIM TIM5
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

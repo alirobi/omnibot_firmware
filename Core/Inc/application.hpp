@@ -16,7 +16,7 @@ extern "C" {
 
 typedef enum {
 	SPI3_IT,
-	TIM4_IT
+	TIM9_IT
 } interruptLink_t;
 
 void setup(void);

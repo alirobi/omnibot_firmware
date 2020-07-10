@@ -109,7 +109,12 @@ void FSM::fsmDisable(void) {
 	fsmTransition(CORE_STARTUP);
 }
 void FSM::fsmCoreStartup(void) {
-	HAL_TIM_Base_Start_IT(&htim4);
+
+	HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
+	HAL_TIM_Base_Start_IT(&htim9);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
+	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+	HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL);
 
 	HAL_TIM_PWM_Start(MOTOR_A_CMD1_TIMER, MOTOR_A_CMD1_CHANNEL);
 	HAL_TIM_PWM_Start(MOTOR_A_CMD2_TIMER, MOTOR_A_CMD2_CHANNEL);
@@ -130,7 +135,7 @@ void FSM::fsmAuxStartup(void) {
 }
 void FSM::fsmDrive(void) {
 	(&htim3)->Instance->CCR1 = _duty;
-	_duty = (_duty < 500) ? 750 : 250;
+	_duty = (_duty < 500) ? 900 : 100;
 }
 void FSM::fsmStop(void) {
 

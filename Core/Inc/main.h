@@ -107,7 +107,6 @@ void HAL_GPIO_WRITE_ODR(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 #define I2C_BUS_SDA_Pin GPIO_PIN_9
 #define I2C_BUS_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

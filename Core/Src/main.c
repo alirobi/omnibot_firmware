@@ -57,9 +57,9 @@ TIM_HandleTypeDef htim5;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+//int8_t pike_buff[42];
 struct pi2nu *msg;
-int8_t buff[42];
+int8_t pike_buff[11]= {11,12,13,14,15,16,17,18,19,20,'\n'};
 struct nu2pi msg2pi;
 /* USER CODE END PV */
 
@@ -130,12 +130,11 @@ int main(void)
   {
 //	loop();
 	  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
+
+	    HAL_UART_Transmit(&huart2, pike_buff, 11, 0xFFFF);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  char *msg = "Hello Nucleo Fun!\n\r";
-
-	  HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 0xFFFF);
   }
   /* USER CODE END 3 */
 }
@@ -296,12 +295,6 @@ static void MX_SPI3_Init(void)
   /* USER CODE BEGIN SPI3_Init 2 */
 //  __HAL_SPI_ENABLE_IT(&hspi3, SPI_IT_RXNE);
 //  HAL_SPI_Receive_IT(&hspi3, &msg, 42);
-  msg2pi.a_delta = 10;
-  msg2pi.b_delta = 20;
-  msg2pi.c_delta = 30;
-  msg2pi.checkSum = 1;
-  msg = &buff;
-  HAL_SPI_TransmitReceive_IT(&hspi3, &msg2pi, &buff, 42);
 
   /* USER CODE END SPI3_Init 2 */
 
@@ -532,7 +525,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 960000;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -544,7 +537,7 @@ static void MX_USART2_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART2_Init 2 */
-
+  HAL_UART_Receive_IT(&huart2,&pike_buff,11);
   /* USER CODE END USART2_Init 2 */
 
 }

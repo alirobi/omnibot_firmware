@@ -27,6 +27,9 @@ extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim9;
 
+extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart1;
+
 extern uint8_t spi_data[PRIMARY_SPI_BUS_DATA_SIZE_BYTES];
 
 LSM6 IMU;

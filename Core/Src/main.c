@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <application.hpp>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,6 +55,7 @@ TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim9;
 
+UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -74,13 +76,19 @@ static void MX_ADC1_Init(void);
 static void MX_TIM9_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  HAL_UART_Receive_IT(&huart1, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
+//  HAL_Delay(5000);
+//  HAL_UART_Transmit(&huart1, (uint8_t*)spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES, 0xFFFF);
+}
 /* USER CODE END 0 */
 
 /**
@@ -121,6 +129,7 @@ int main(void)
   MX_TIM9_Init();
   MX_TIM4_Init();
   MX_USART2_UART_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   setup();
@@ -128,6 +137,9 @@ int main(void)
   uint16_t cur_cntsB;
   uint16_t cur_cntsC;
 
+  HAL_UART_Receive_IT (&huart1, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
+  char data[6] = {0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6};
+  uint8_t i = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -139,6 +151,13 @@ int main(void)
 	  cur_cntsC = (MOTOR_C_ENC_TIM->CNT & 0xFFFF);
 //	  loop();
 //	  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
+      char msg[] = "Hello Nucleo Nuf!\n\r";
+//      char msg[64];
+//      msg[3] = 0x01;
+
+      HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 0xFFFF);
+      i++;
+//      HAL_UART_Transmit(&huart1, (uint8_t*)data, 6, 0xFFFF);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -607,6 +626,39 @@ static void MX_TIM9_Init(void)
 }
 
 /**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 921600;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -622,7 +674,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 960000;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;

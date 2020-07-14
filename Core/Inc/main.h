@@ -111,7 +111,7 @@ void Error_Handler(void);
 #define I2C_BUS_SDA_Pin GPIO_PIN_9
 #define I2C_BUS_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-#define PRIMARY_SPI_BUS_DATA_SIZE_BYTES 50
+#define SDATA_SIZE_BYTES 64
 
 #define MOTOR_A_CMD1_TIMER &htim3
 #define MOTOR_A_CMD1_CHANNEL TIM_CHANNEL_1

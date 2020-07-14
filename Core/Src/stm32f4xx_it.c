@@ -60,10 +60,10 @@
 extern SPI_HandleTypeDef hspi3;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim9;
-extern UART_HandleTypeDef huart1;
+extern DMA_HandleTypeDef hdma_usart1_rx;
 extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN EV */
-extern uint8_t spi_data[PRIMARY_SPI_BUS_DATA_SIZE_BYTES];
+extern uint8_t sdata[SDATA_SIZE_BYTES];
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -248,20 +248,6 @@ void TIM1_CC_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART1 global interrupt.
-  */
-void USART1_IRQHandler(void)
-{
-  /* USER CODE BEGIN USART1_IRQn 0 */
-
-  /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart1);
-  /* USER CODE BEGIN USART1_IRQn 1 */
-//  HAL_UART_Receive_IT(&huart1, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
-  /* USER CODE END USART1_IRQn 1 */
-}
-
-/**
   * @brief This function handles USART2 global interrupt.
   */
 void USART2_IRQHandler(void)
@@ -271,7 +257,7 @@ void USART2_IRQHandler(void)
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
-  //HAL_UART_Receive_IT(&huart2, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
+  //HAL_UART_Receive_IT(&huart2, spi_data, SDATA_SIZE_BYTES);
   /* USER CODE END USART2_IRQn 1 */
 }
 
@@ -288,6 +274,20 @@ void SPI3_IRQHandler(void)
   interruptLink(SPI3_IT);
 //  HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
   /* USER CODE END SPI3_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 stream2 global interrupt.
+  */
+void DMA2_Stream2_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream2_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream2_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart1_rx);
+  /* USER CODE BEGIN DMA2_Stream2_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

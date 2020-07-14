@@ -7,6 +7,7 @@
 
 #include "fsm.hpp"
 #include "main.h"
+#include <string.h>
 
 extern ADC_HandleTypeDef hadc1;
 
@@ -21,7 +22,10 @@ extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim9;
 
-extern uint8_t spi_data[PRIMARY_SPI_BUS_DATA_SIZE_BYTES];
+extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart1;
+
+extern uint8_t sdata[SDATA_SIZE_BYTES];
 
 /**
 	* @brief  FSM constructor. Sets state to disabled
@@ -79,49 +83,49 @@ bool FSM::fsmRun(void) {
 	* @retval valid state transition
 	*/
 bool FSM::fsmTransition(fsmState_t nextState) {
-		bool validity = INVALID_TRANS;
-		switch(nextState) {
-			case DISABLED:
-				if (_curState == STOP) {
-					// FSM will start in DISABLE, but otherwise should only get here
-					// after a STOP routine
-					validity = VALID_TRANS;
-				}
-				break;
-			case CORE_STARTUP:
-				if (_curState == DISABLED) {
-					validity = VALID_TRANS;
-				}
-				break;
-			case CONFIG:
-				if (_curState == STOP) {
-					// CONFIG should only occur after a STOP
-					validity = VALID_TRANS;
-				}
-				break;
-			case AUX_STARTUP:
-				if (_curState == CORE_STARTUP || _curState == CONFIG) {
-					validity = VALID_TRANS;
-				}
-			break;
-			case DRIVE:
-				if (_curState == AUX_STARTUP) {
-					validity = VALID_TRANS;
-				}
-			break;
-			case STOP:
+	bool validity = INVALID_TRANS;
+	switch(nextState) {
+		case DISABLED:
+			if (_curState == STOP) {
+				// FSM will start in DISABLE, but otherwise should only get here
+				// after a STOP routine
 				validity = VALID_TRANS;
-				break;
-			case FAULT:
+			}
+			break;
+		case CORE_STARTUP:
+			if (_curState == DISABLED) {
 				validity = VALID_TRANS;
-				break;
-			default:
-				break;
-		}
-		if (validity) {
-			_curState = nextState;
-		}
-		return validity;
+			}
+			break;
+		case CONFIG:
+			if (_curState == STOP) {
+				// CONFIG should only occur after a STOP
+				validity = VALID_TRANS;
+			}
+			break;
+		case AUX_STARTUP:
+			if (_curState == CORE_STARTUP || _curState == CONFIG) {
+				validity = VALID_TRANS;
+			}
+		break;
+		case DRIVE:
+			if (_curState == AUX_STARTUP) {
+				validity = VALID_TRANS;
+			}
+		break;
+		case STOP:
+			validity = VALID_TRANS;
+			break;
+		case FAULT:
+			validity = VALID_TRANS;
+			break;
+		default:
+			break;
+	}
+	if (validity) {
+		_curState = nextState;
+	}
+	return validity;
 }
 
 //TODO: Implement these properly:
@@ -197,6 +201,9 @@ void FSM::fsmAuxStartup(void) {
 void FSM::fsmDrive(void) {
 	(&htim3)->Instance->CCR1 = _duty;
 	_duty = (_duty < 500) ? 900 : 100;
+
+	char msg[] = "Hello Nucleo Nuf!\n\r";
+	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 0xFFFF);
 }
 
 /**

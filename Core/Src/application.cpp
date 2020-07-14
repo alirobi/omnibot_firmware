@@ -30,7 +30,7 @@ extern TIM_HandleTypeDef htim9;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart1;
 
-extern uint8_t spi_data[PRIMARY_SPI_BUS_DATA_SIZE_BYTES];
+extern uint8_t sdata[SDATA_SIZE_BYTES];
 
 LSM6 IMU;
 
@@ -63,7 +63,8 @@ void loop(void) {
 }
 
 /**
-  * @brief  Called from Interrupt Service Routines (ISRs) running from @ref /Core/Src/stm32f4xx_it.c
+  * @brief  Called from Interrupt Service Routines (ISRs)
+  * 		running from @ref /Core/Src/stm32f4xx_it.c
   * @note	Expand as necessary
   * @param  none
   * @retval none
@@ -73,7 +74,7 @@ void interruptLink(interruptLink_t it) {
 	case SPI3_IT:
 		// DO SOMETHING WITH spi_data
 		// reset interrupt to top of buffer
-		HAL_SPI_Receive_IT(&hspi3, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
+//		HAL_SPI_Receive_IT(&hspi3, spi_data, SDATA_SIZE_BYTES);
 		break;
 	case TIM9_IT:
 		// PRIMARY FSM TASK

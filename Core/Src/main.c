@@ -57,15 +57,17 @@ TIM_HandleTypeDef htim9;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart1_rx;
 
 /* USER CODE BEGIN PV */
 
-uint8_t spi_data[PRIMARY_SPI_BUS_DATA_SIZE_BYTES];
+uint8_t sdata[SDATA_SIZE_BYTES];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI3_Init(void);
 static void MX_TIM1_Init(void);
@@ -85,9 +87,7 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN 0 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  HAL_UART_Receive_IT(&huart1, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
-//  HAL_Delay(5000);
-//  HAL_UART_Transmit(&huart1, (uint8_t*)spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES, 0xFFFF);
+	return;
 }
 /* USER CODE END 0 */
 
@@ -119,6 +119,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_SPI3_Init();
   MX_TIM1_Init();
@@ -137,27 +138,18 @@ int main(void)
   uint16_t cur_cntsB;
   uint16_t cur_cntsC;
 
-  HAL_UART_Receive_IT (&huart1, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
+  HAL_UART_Receive_IT (&huart1, sdata, SDATA_SIZE_BYTES);
   char data[6] = {0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6};
-  uint8_t i = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  cur_cntsA = (MOTOR_A_ENC_TIM->CNT & 0xFFFF);
-	  cur_cntsB = (MOTOR_B_ENC_TIM->CNT & 0xFFFF);
-	  cur_cntsC = (MOTOR_C_ENC_TIM->CNT & 0xFFFF);
-//	  loop();
-//	  HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
-      char msg[] = "Hello Nucleo Nuf!\n\r";
-//      char msg[64];
-//      msg[3] = 0x01;
-
-      HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 0xFFFF);
-      i++;
-//      HAL_UART_Transmit(&huart1, (uint8_t*)data, 6, 0xFFFF);
+	cur_cntsA = (MOTOR_A_ENC_TIM->CNT & 0xFFFF);
+	cur_cntsB = (MOTOR_B_ENC_TIM->CNT & 0xFFFF);
+	cur_cntsC = (MOTOR_C_ENC_TIM->CNT & 0xFFFF);
+	loop();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -319,7 +311,7 @@ static void MX_SPI3_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN SPI3_Init 2 */
-  HAL_SPI_Receive_IT(&hspi3, spi_data, PRIMARY_SPI_BUS_DATA_SIZE_BYTES);
+  HAL_SPI_Receive_IT(&hspi3, sdata, SDATA_SIZE_BYTES);
 
   /* USER CODE END SPI3_Init 2 */
 
@@ -653,7 +645,7 @@ static void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
-
+  HAL_UART_Receive_DMA(&huart1, &sdata, SDATA_SIZE_BYTES);
   /* USER CODE END USART1_Init 2 */
 
 }
@@ -688,6 +680,22 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
+
+}
+
+/** 
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void) 
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
 
 }
 

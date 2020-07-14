@@ -25,6 +25,7 @@
 
 /* USER CODE END Includes */
 extern DMA_HandleTypeDef hdma_usart1_rx;
+extern DMA_HandleTypeDef hdma_usart2_rx;
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
@@ -61,7 +62,7 @@ extern DMA_HandleTypeDef hdma_usart1_rx;
 /* USER CODE END 0 */
                         
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-                                        /**
+                    /**
   * Initializes the Global MSP.
   */
 void HAL_MspInit(void)
@@ -232,7 +233,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
     /**SPI3 GPIO Configuration    
-    PA4     ------> SPI3_NSS
+    PA15     ------> SPI3_NSS
     PC10     ------> SPI3_SCK
     PC11     ------> SPI3_MISO
     PC12     ------> SPI3_MOSI 
@@ -278,7 +279,7 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
     __HAL_RCC_SPI3_CLK_DISABLE();
   
     /**SPI3 GPIO Configuration    
-    PA4     ------> SPI3_NSS
+    PA15     ------> SPI3_NSS
     PC10     ------> SPI3_SCK
     PC11     ------> SPI3_MISO
     PC12     ------> SPI3_MOSI 
@@ -461,6 +462,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM3_MspPostInit 0 */
 
   /* USER CODE END TIM3_MspPostInit 0 */
+  
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
     /**TIM3 GPIO Configuration    
@@ -631,10 +633,18 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
 void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 {
   if(htim_base->Instance==TIM9)
+* @brief UART MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param huart: UART handle pointer
+* @retval None
+*/
+void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
+{
+  if(huart->Instance==USART2)
   {
-  /* USER CODE BEGIN TIM9_MspDeInit 0 */
+  /* USER CODE BEGIN USART2_MspDeInit 0 */
 
-  /* USER CODE END TIM9_MspDeInit 0 */
+  /* USER CODE END USART2_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM9_CLK_DISABLE();
 
@@ -648,8 +658,19 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE END TIM9:TIM1_BRK_TIM9_IRQn disable */
 
   /* USER CODE BEGIN TIM9_MspDeInit 1 */
+    __HAL_RCC_USART2_CLK_DISABLE();
+  
+    /**USART2 GPIO Configuration    
+    PA2     ------> USART2_TX
+    PA3     ------> USART2_RX 
+    */
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_2|GPIO_PIN_3);
 
-  /* USER CODE END TIM9_MspDeInit 1 */
+    /* USART2 DMA DeInit */
+    HAL_DMA_DeInit(huart->hdmarx);
+  /* USER CODE BEGIN USART2_MspDeInit 1 */
+
+  /* USER CODE END USART2_MspDeInit 1 */
   }
 
 }

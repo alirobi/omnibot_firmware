@@ -25,6 +25,8 @@
 /* USER CODE BEGIN Includes */
 #include <application.hpp>
 #include <string.h>
+#include <pi2nu.h>
+#include <nu2pi.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,15 +55,18 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
-TIM_HandleTypeDef htim9;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart1_rx;
+DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
-
 uint8_t sdata[SDATA_SIZE_BYTES];
+/* USER CODE BEGIN PV */
+//int8_t pike_buff[42];
+struct pi2nu *msg;
+struct nu2pi msg2pi;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,7 +85,9 @@ static void MX_TIM4_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+return;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -146,10 +153,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	cur_cntsA = (MOTOR_A_ENC_TIM->CNT & 0xFFFF);
-	cur_cntsB = (MOTOR_B_ENC_TIM->CNT & 0xFFFF);
-	cur_cntsC = (MOTOR_C_ENC_TIM->CNT & 0xFFFF);
-	loop();
+		cur_cntsA = (MOTOR_A_ENC_TIM->CNT & 0xFFFF);
+		cur_cntsB = (MOTOR_B_ENC_TIM->CNT & 0xFFFF);
+		cur_cntsC = (MOTOR_C_ENC_TIM->CNT & 0xFFFF);
+		loop();
+		HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
+		HAL_UART_Transmit(&huart2, pike_buff, 11, 0xFFFF);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -580,20 +589,18 @@ static void MX_TIM5_Init(void)
 }
 
 /**
-  * @brief TIM9 Initialization Function
+  * @brief USART2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM9_Init(void)
+static void MX_USART2_UART_Init(void)
 {
 
-  /* USER CODE BEGIN TIM9_Init 0 */
+  /* USER CODE BEGIN USART2_Init 0 */
 
-  /* USER CODE END TIM9_Init 0 */
+  /* USER CODE END USART2_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-
-  /* USER CODE BEGIN TIM9_Init 1 */
+  /* USER CODE BEGIN USART2_Init 1 */
 
   /* USER CODE END TIM9_Init 1 */
   htim9.Instance = TIM9;
@@ -612,7 +619,7 @@ static void MX_TIM9_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM9_Init 2 */
-
+	HAL_UART_Receive_DMA(&huart2, &pike_buff, 11);
   /* USER CODE END TIM9_Init 2 */
 
 }

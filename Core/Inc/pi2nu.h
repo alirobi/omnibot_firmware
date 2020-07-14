@@ -27,6 +27,7 @@ struct PID{
     int8_t checkSum;
 };
 
+static int8_t pike_buff[11]= {11,12,13,14,15,16,17,18,19,20,'\n'};
 
 //int main(){
 //    struct pi2nu *msg;

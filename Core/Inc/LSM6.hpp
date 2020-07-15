@@ -26,8 +26,8 @@ extern "C" {
 			enum sa0State{sa0Low, sa0High, sa0Auto};
 			enum regAddr
 			{
-				FUNC_CFG_ACCESS = 0X01,
-				FIFO_CTRL1 = 0X06,
+				FUNC_CFG_ACCESS   = 0X01,
+				FIFO_CTRL1        = 0X06,
 				FIFO_CTRL2        = 0x07,
 				FIFO_CTRL3        = 0x08,
 				FIFO_CTRL4        = 0x09,

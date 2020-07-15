@@ -169,8 +169,8 @@ motorStatus_t Motor::motorCommand(float cmd) {
 	motorStatus_t status;
 
 	if (cmd >= 0) {
-		status = writePWMDuty(cmd1TIM_, cmd1TIMChannel_, abs(cmd));
 		status = writePWMDuty(cmd2TIM_, cmd2TIMChannel_, 0);
+		status = writePWMDuty(cmd1TIM_, cmd1TIMChannel_, abs(cmd));
 	}
 	else {
 		status = writePWMDuty(cmd1TIM_, cmd1TIMChannel_, 0);

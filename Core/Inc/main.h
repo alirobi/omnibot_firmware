@@ -118,21 +118,21 @@ void Error_Handler(void);
 #define MOTOR_A_CMD2_TIMER &htim3
 #define MOTOR_A_CMD2_CHANNEL TIM_CHANNEL_2
 
-#define MOTOR_A_ENC_TIM TIM1
+#define MOTOR_A_ENC_TIM &htim1
 
 #define MOTOR_B_CMD1_TIMER &htim3
 #define MOTOR_B_CMD1_CHANNEL TIM_CHANNEL_3
 #define MOTOR_B_CMD2_TIMER &htim3
 #define MOTOR_B_CMD2_CHANNEL TIM_CHANNEL_4
 
-#define MOTOR_B_ENC_TIM TIM2
+#define MOTOR_B_ENC_TIM &htim2
 
 #define MOTOR_C_CMD1_TIMER &htim4
 #define MOTOR_C_CMD1_CHANNEL TIM_CHANNEL_1
 #define MOTOR_C_CMD2_TIMER &htim4
 #define MOTOR_C_CMD2_CHANNEL TIM_CHANNEL_2
 
-#define MOTOR_C_ENC_TIM TIM5
+#define MOTOR_C_ENC_TIM &htim5
 
 /* USER CODE END Private defines */
 

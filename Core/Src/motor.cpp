@@ -7,6 +7,7 @@
 
 #include "motor.hpp"
 #include <stdlib.h> 
+#include <cmath>
 
 // TODO: design away these `extern`s
 
@@ -36,7 +37,7 @@ Motor::Motor( motorID_t motorID,
 		samplingTime_(samTime), cutoffFreq_(cfFreq), dir_(dir) {
 	
 	filtConst_ = exp(-cutoffFreq_*samplingTime_);
-	motorStatus_ = DISABLED;
+	motorStatus_ = MOTOR_DISABLED;
 
 	cmdDutyDenom_ = 0;
 
@@ -67,7 +68,7 @@ Motor::Motor( motorID_t motorID,
 		break;
 	}
 
-	cmdDutyDenom = cmd1TIM_->Instance->ARR;
+	cmdDutyDenom_ = cmd1TIM_->Instance->ARR;
 
 }
 
@@ -78,12 +79,12 @@ motorStatus_t Motor::init() {
 		|| cmd1TIM_->Instance->ARR != cmd2TIM_->Instance->ARR
 		|| false) {
 		motorError_ = TIM_CONFIG_ERR;
-		motorStatus_ = ERROR;
-		return ERROR;
+		motorStatus_ = MOTOR_ERROR;
+		return MOTOR_ERROR;
 	}
 	// TODO: check other things
-	motorStatus_ = OK;
-	return OK;
+	motorStatus_ = MOTOR_OK;
+	return MOTOR_OK;
 }
 
 void Motor::setPID(float p, float i, float d) {
@@ -92,8 +93,10 @@ void Motor::setPID(float p, float i, float d) {
 	dGain_ = d;
 }
 
-void Motor::manualCommand() {
+motorStatus_t Motor::manualCommand(float cmd) {
 	targetSpeed_ = 0;
+
+	return MOTOR_OK;
 }
 
 void Motor::setTarSpeed(float speed) {
@@ -105,27 +108,29 @@ void Motor::calcCurSpeed(){
 }
 
 motorStatus_t Motor::runPID() {
-	error = targetSpeed_ - currentSpeed;
-	iError += (error + lastError) / 2 * samplingTime;
-	dError = filtConst * ((error - lastError) / samplingTime) + (1-filtConst) * dError;
-	command = pGain*error + iGain*iError + dGain*dError;
-	lastError = error;
+//	error = targetSpeed_ - currentSpeed;
+//	iError += (error + lastError) / 2 * samplingTime;
+//	dError = filtConst * ((error - lastError) / samplingTime) + (1-filtConst) * dError;
+//	command = pGain*error + iGain*iError + dGain*dError;
+//	lastError = error;
+
+	return MOTOR_OK;
 }
 
 motorStatus_t Motor::writePWMDuty(TIM_HandleTypeDef * cmd_htim_ptr, float duty_mag) {
 	if (duty_mag > 1.001*CMD_UPPER_LIM || duty_mag < 0) {
 		motorError_ = COMMAND_MAG_TOO_HIGH_ERR;
 		cmd_htim_ptr->Instance->CCR1 = 0;
-		return ERROR;
+		return MOTOR_ERROR;
 	}
-	cmd_htim_ptr->Instance->CCR1 = (duty_mag * cmdDutyDenom) & 0xFFFF;
-	return OK;
+	cmd_htim_ptr->Instance->CCR1 = (static_cast<uint16_t>(duty_mag * cmdDutyDenom_)) & 0xFFFF;
+	return MOTOR_OK;
 }
 
 motorStatus_t Motor::motorCommand(float cmd) {
 	if (cmd > CMD_UPPER_LIM || cmd < CMD_LOWER_LIM) {
 		motorError_ = COMMAND_MAG_TOO_HIGH_ERR;
-		return ERROR;
+		return MOTOR_ERROR;
 	}
 	cmd *= dir_;
 

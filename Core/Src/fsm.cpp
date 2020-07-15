@@ -6,6 +6,7 @@
  */
 
 #include "fsm.hpp"
+#include "motor.hpp"
 #include "main.h"
 #include <string.h>
 
@@ -156,9 +157,9 @@ void FSM::fsmCoreStartup(void) {
 	HAL_TIM_Base_Start_IT(&htim9);
 
 	// Motor encoders ready to read
-	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
-	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
-	HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL);
+	HAL_TIM_Encoder_Start(MOTOR_A_ENC_TIM, TIM_CHANNEL_ALL);
+	HAL_TIM_Encoder_Start(MOTOR_B_ENC_TIM, TIM_CHANNEL_ALL);
+	HAL_TIM_Encoder_Start(MOTOR_B_ENC_TIM, TIM_CHANNEL_ALL);
 
 	// Motor command PWM generation -- initialized at 0% duty cycle
 	HAL_TIM_PWM_Start(MOTOR_A_CMD1_TIMER, MOTOR_A_CMD1_CHANNEL);

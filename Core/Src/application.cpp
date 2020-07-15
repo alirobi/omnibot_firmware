@@ -10,8 +10,9 @@ extern "C" {
 #endif
 
 #include "application.hpp"
-#include <lsm6.hpp>
+#include "lsm6.hpp"
 #include "fsm.hpp"
+#include "motor.hpp"
 #include "main.h"
 
 extern ADC_HandleTypeDef hadc1;

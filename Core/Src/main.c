@@ -152,9 +152,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		cur_cntsA = (MOTOR_A_ENC_TIM->CNT & 0xFFFF);
-		cur_cntsB = (MOTOR_B_ENC_TIM->CNT & 0xFFFF);
-		cur_cntsC = (MOTOR_C_ENC_TIM->CNT & 0xFFFF);
+		cur_cntsA = (MOTOR_A_ENC_TIM)->Instance->CNT & 0xFFFF;
+		cur_cntsB = (MOTOR_B_ENC_TIM)->Instance->CNT & 0xFFFF;
+		cur_cntsC = (MOTOR_C_ENC_TIM)->Instance->CNT & 0xFFFF;
 		loop();
 		HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
 		HAL_UART_Transmit(&huart2, pike_buff, 11, 0xFFFF);

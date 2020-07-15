@@ -16,28 +16,28 @@
 
 #include "main.h"
 
+enum motorID_t {
+	MOTOR_A,
+	MOTOR_B,
+	MOTOR_C
+};
+
+enum motorStatus_t {
+	MOTOR_DISABLED,
+	MOTOR_OK,
+	MOTOR_ERROR
+};
+
+enum motorError_t {
+	NO_ERR,
+	MOTOR_CONFIG_ERR,
+	TIM_CONFIG_ERR,
+	COMMAND_MAG_TOO_HIGH_ERR
+};
+
 class Motor{
 public:
 	float currentSpeed;
-
-	enum motorID_t {
-		MOTOR_A,
-		MOTOR_B,
-		MOTOR_C
-	}
-
-	enum motorStatus_t {
-		DISABLED,
-		OK,
-		ERROR
-	}
-
-	enum motorError_t {
-		NO_ERR,
-		MOTOR_CONFIG_ERR,
-		TIM_CONFIG_ERR,
-		COMMAND_MAG_TOO_HIGH_ERR
-	}
 
 	Motor(motorID_t motorID, float p, float i, float d, float samTime, float cfFreq, uint8_t dir);
 	motorStatus_t init();

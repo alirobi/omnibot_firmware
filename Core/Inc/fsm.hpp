@@ -19,35 +19,35 @@ extern "C" {
 
 class FSM {
 public:
-    enum fsmState_t {
-        DISABLED,
-        CORE_STARTUP,
-        CONFIG,
-		AUX_STARTUP,
-        DRIVE,
-		STOP,
-        FAULT
-    };
+	enum fsmState_t {
+		DISABLED,
+		CORE_STARTUP,
+		CONFIG,
+	AUX_STARTUP,
+		DRIVE,
+	STOP,
+		FAULT
+	};
 
-    FSM(void);
+	FSM(void);
 
-    bool fsmRun(void);
+	bool fsmRun(void);
 
-    bool fsmTransition(fsmState_t nextState);
+	bool fsmTransition(fsmState_t nextState);
 
 private:
-    fsmState_t _curState;
-    bool _busy = false;
+	fsmState_t _curState;
+	bool _busy = false;
 
-    uint16_t _duty = 250;
+	uint16_t _duty = 250;
 
-    void fsmDisable(void);
-    void fsmCoreStartup(void);
-    void fsmConfig(void);
-    void fsmAuxStartup(void);
-    void fsmDrive(void);
-    void fsmStop(void);
-    void fsmFault(void);
+	void fsmDisable(void);
+	void fsmCoreStartup(void);
+	void fsmConfig(void);
+	void fsmAuxStartup(void);
+	void fsmDrive(void);
+	void fsmStop(void);
+	void fsmFault(void);
 };
 
 #ifdef __cplusplus

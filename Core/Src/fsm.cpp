@@ -109,12 +109,12 @@ bool FSM::fsmTransition(fsmState_t nextState) {
 			if (_curState == CORE_STARTUP || _curState == CONFIG) {
 				validity = VALID_TRANS;
 			}
-		break;
+			break;
 		case DRIVE:
 			if (_curState == AUX_STARTUP) {
 				validity = VALID_TRANS;
 			}
-		break;
+			break;
 		case STOP:
 			validity = VALID_TRANS;
 			break;

@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 #include "application.hpp"
-#include "LSM6.hpp"
+#include <lsm6.hpp>
 #include "fsm.hpp"
 #include "main.h"
 

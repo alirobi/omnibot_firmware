@@ -30,6 +30,10 @@ extern DMA_HandleTypeDef hdma_usart2_rx;
 
 extern uint8_t sdata[SDATA_SIZE_BYTES];
 
+extern Motor MotorA;
+extern Motor MotorB;
+extern Motor MotorC;
+
 /**
 	* @brief  FSM constructor. Sets state to disabled
 	* @note
@@ -159,7 +163,12 @@ void FSM::fsmCoreStartup(void) {
 	// Motor encoders ready to read
 	HAL_TIM_Encoder_Start(MOTOR_A_ENC_TIM, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(MOTOR_B_ENC_TIM, TIM_CHANNEL_ALL);
-	HAL_TIM_Encoder_Start(MOTOR_B_ENC_TIM, TIM_CHANNEL_ALL);
+	HAL_TIM_Encoder_Start(MOTOR_C_ENC_TIM, TIM_CHANNEL_ALL);
+
+	// Motors disarmed
+	HAL_GPIO_WritePin(MOTOR_A_ARM_GPIO_Port, MOTOR_A_ARM_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MOTOR_B_ARM_GPIO_Port, MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MOTOR_C_ARM_GPIO_Port, MOTOR_C_ARM_Pin, GPIO_PIN_RESET);
 
 	// Motor command PWM generation -- initialized at 0% duty cycle
 	HAL_TIM_PWM_Start(MOTOR_A_CMD1_TIMER, MOTOR_A_CMD1_CHANNEL);
@@ -192,6 +201,9 @@ void FSM::fsmConfig(void) {
 	* @retval none
 	*/
 void FSM::fsmAuxStartup(void) {
+	MotorA.arm();
+	MotorB.arm();
+	MotorC.arm();
 	fsmTransition(DRIVE);
 }
 
@@ -202,8 +214,13 @@ void FSM::fsmAuxStartup(void) {
 	* @retval none
 	*/
 void FSM::fsmDrive(void) {
-	(&htim3)->Instance->CCR1 = _duty;
 	_duty = (_duty < 500) ? 900 : 100;
+	static float cmd = -0.5;
+	cmd = (cmd < 0) ? 0.5 : -0.5;
+
+	MotorA.manualCommand(cmd);
+	MotorB.manualCommand(cmd);
+	MotorC.manualCommand(cmd);
 
 	char msg[] = "Hello Nucleo Nuf!\n\r";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 0xFFFF);

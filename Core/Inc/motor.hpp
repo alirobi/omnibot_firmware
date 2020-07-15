@@ -15,6 +15,7 @@
 #define CMD_LOWER_LIM -1
 
 #include "main.h"
+#include "stm32f4xx_hal.h"
 
 enum motorID_t {
 	MOTOR_A,
@@ -41,6 +42,8 @@ public:
 
 	Motor(motorID_t motorID, float p, float i, float d, float samTime, float cfFreq, uint8_t dir);
 	motorStatus_t init();
+	motorStatus_t arm();
+	motorStatus_t disarm();
 	void setPID(float p, float i, float d);
 	motorStatus_t manualCommand(float cmd);
 	void setTarSpeed(float speed);
@@ -70,8 +73,12 @@ private:
 	TIMChannel_t cmd1TIMChannel_;
 	TIM_HandleTypeDef * cmd2TIM_;
 	TIMChannel_t cmd2TIMChannel_;
+	GPIO_TypeDef * armPinGPIOPort_;
+	uint16_t armPinGPIOPin_;
 
-	motorStatus_t writePWMDuty(TIM_HandleTypeDef * cmd_htim_ptr, float duty);
+	motorStatus_t writePWMDuty(TIM_HandleTypeDef * cmd_htim_ptr,
+			TIMChannel_t cmd_channel,
+			float duty_mag);
 	motorStatus_t motorCommand(float cmd);
 };
 

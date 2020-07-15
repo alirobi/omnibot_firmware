@@ -36,7 +36,9 @@ extern DMA_HandleTypeDef hdma_usart2_rx;
 extern uint8_t sdata[SDATA_SIZE_BYTES];
 
 LSM6 IMU;
-
+Motor MotorA(MOTOR_A, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
+Motor MotorB(MOTOR_B, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
+Motor MotorC(MOTOR_C, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
 FSM OmnibotFSM;
 
 /**
@@ -52,6 +54,10 @@ void setup(void) {
 
 	IMU.init(LSM6::deviceAuto, LSM6::sa0Auto, &hi2c1);
 	IMU.enableDefault();
+
+	MotorA.init();
+	MotorB.init();
+	MotorC.init();
 }
 
 /**

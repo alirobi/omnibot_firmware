@@ -168,7 +168,7 @@ void FSM::fsmCoreStartup(void) {
 	// Motors disarmed
 	HAL_GPIO_WritePin(MOTOR_A_ARM_GPIO_Port, MOTOR_A_ARM_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(MOTOR_B_ARM_GPIO_Port, MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(MOTOR_C_ARM_GPIO_Port, MOTOR_C_ARM_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MOTOR_C_ARM_ALT_GPIO_Port, MOTOR_C_ARM_ALT_Pin, GPIO_PIN_RESET);
 
 	// Motor command PWM generation -- initialized at 0% duty cycle
 	HAL_TIM_PWM_Start(MOTOR_A_CMD1_TIMER, MOTOR_A_CMD1_CHANNEL);

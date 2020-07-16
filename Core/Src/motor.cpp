@@ -66,8 +66,8 @@ Motor::Motor( motorID_t motorID,
 		cmd1TIMChannel_ = MOTOR_C_CMD1_CHANNEL;
 		cmd2TIM_        = MOTOR_C_CMD2_TIMER;
 		cmd2TIMChannel_ = MOTOR_C_CMD2_CHANNEL;
-		armPinGPIOPort_ = MOTOR_C_ARM_GPIO_Port;
-		armPinGPIOPin_  = MOTOR_C_ARM_Pin;
+		armPinGPIOPort_ = MOTOR_C_ARM_ALT_GPIO_Port;
+		armPinGPIOPin_  = MOTOR_C_ARM_ALT_Pin;
 		break;
 	default:
 		// TODO

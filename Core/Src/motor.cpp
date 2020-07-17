@@ -6,8 +6,9 @@
  */
 
 #include "motor.hpp"
-#include <stdlib.h> 
-#include <cmath>
+#include <stdlib.h>
+#include <math.h>
+//#include <cmath>
 
 // TODO: design away these `extern`s
 
@@ -29,6 +30,13 @@ extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 
+void break_test() {
+	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+	for (int i = 0; i < 20; i++)
+	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+	return;
+}
+
 Motor::Motor( motorID_t motorID,
 		float p, float i, float d,
 		float samTime, float cfFreq, uint8_t dir) : 
@@ -38,6 +46,12 @@ Motor::Motor( motorID_t motorID,
 	
 	filtConst_ = exp(-cutoffFreq_*samplingTime_);
 	motorStatus_ = MOTOR_DISABLED;
+
+	command_ = 0;
+	error_ = 0;
+	lastError_ = 0;
+	iError_ = 0;
+	dError_ = 0;
 
 	cmdDutyDenom_ = 0;
 
@@ -94,6 +108,8 @@ motorStatus_t Motor::init() {
 		return MOTOR_ERROR;
 	}
 	cmdDutyDenom_ = cmd1TIM_->Instance->ARR;
+	lastEncCount_ = (encTIM_)->Instance->CNT & 0xFFFF;
+	curEncCount_ = lastEncCount_;
 	// TODO: check other things
 	motorStatus_ = MOTOR_OK;
 	return MOTOR_OK;
@@ -106,13 +122,13 @@ void Motor::setPID(float p, float i, float d) {
 }
 
 motorStatus_t Motor::manualCommand(float cmd) {
-	targetSpeed_ = 0;
+	targetSpeedCountsPerStep_ = 0;
 	motorCommand(cmd);
 	return MOTOR_OK;
 }
 
-void Motor::setTarSpeed(float speed) {
-	targetSpeed_ = speed;
+void Motor::setTarSpeed(int32_t speed) {
+	targetSpeedCountsPerStep_ = speed;
 }
 
 void Motor::calcCurSpeed(){
@@ -125,6 +141,33 @@ motorStatus_t Motor::runPID() {
 //	dError = filtConst * ((error - lastError) / samplingTime) + (1-filtConst) * dError;
 //	command = pGain*error + iGain*iError + dGain*dError;
 //	lastError = error;
+	static float increment = 0;
+	bool zero_crossing;
+	curEncCount_ = (encTIM_)->Instance->CNT & 0xFFFF;
+	currentSpeed = static_cast<int32_t>(curEncCount_) - static_cast<int32_t>(lastEncCount_);
+	error_ = targetSpeedCountsPerStep_ - currentSpeed;
+	iError_ += error_;
+	dError_ = error_ - lastError_;
+
+	if (currentSpeed > (targetSpeedCountsPerStep_*2)) {break_test();}
+
+	// Anti-windup
+	zero_crossing = signbit(lastError_) != signbit(error_);
+	if (zero_crossing || error_ == 0) iError_ = 0;
+	iError_ = (iError_ > INTEGRAL_MAX) ? INTEGRAL_MAX : iError_;
+	iError_ = (iError_ < -INTEGRAL_MAX) ? -INTEGRAL_MAX : iError_;
+
+	lastError_ = error_;
+	lastEncCount_ = curEncCount_;
+
+	increment = pGain_*error_ + iGain_*iError_ - dGain_*dError_;
+
+	command_ += increment;
+
+	command_ = (command_ > 1) ? 1 : command_;
+	command_ = (command_ < -1) ? -1 : command_;
+
+	motorCommand(command_);
 
 	return MOTOR_OK;
 }
@@ -132,12 +175,13 @@ motorStatus_t Motor::runPID() {
 motorStatus_t Motor::writePWMDuty(TIM_HandleTypeDef * cmd_htim_ptr,
 		TIMChannel_t cmd_channel, 
 		float duty_mag) {
+	motorStatus_t status = MOTOR_OK;
+	uint16_t duty_counts = (static_cast<uint16_t>(duty_mag * cmdDutyDenom_)) & 0xFFFF;
 	if (duty_mag > 1.001*CMD_UPPER_LIM || duty_mag < 0) {
 		motorError_ = COMMAND_MAG_TOO_HIGH_ERR;
-		cmd_htim_ptr->Instance->CCR1 = 0;
-		return MOTOR_ERROR;
+		duty_counts = 0;
+		status = MOTOR_ERROR;
 	}
-	uint16_t duty_counts = (static_cast<uint16_t>(duty_mag * cmdDutyDenom_)) & 0xFFFF;
 	switch (cmd_channel) {
 		case TIM_CHANNEL_1:
 			cmd_htim_ptr->Instance->CCR1 = duty_counts;
@@ -156,7 +200,7 @@ motorStatus_t Motor::writePWMDuty(TIM_HandleTypeDef * cmd_htim_ptr,
 		// TODO
 		break;
 	}
-	return MOTOR_OK;
+	return status;
 }
 
 motorStatus_t Motor::motorCommand(float cmd) {

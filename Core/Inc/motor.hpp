@@ -13,6 +13,7 @@
 #define DIR_FLIPPED -1
 #define CMD_UPPER_LIM 1
 #define CMD_LOWER_LIM -1
+#define INTEGRAL_MAX 5000
 
 #include "main.h"
 #include "stm32f4xx_hal.h"
@@ -38,7 +39,7 @@ enum motorError_t {
 
 class Motor{
 public:
-	float currentSpeed;
+	int32_t currentSpeed;
 
 	Motor(motorID_t motorID, float p, float i, float d, float samTime, float cfFreq, uint8_t dir);
 	motorStatus_t init();
@@ -46,7 +47,7 @@ public:
 	motorStatus_t disarm();
 	void setPID(float p, float i, float d);
 	motorStatus_t manualCommand(float cmd);
-	void setTarSpeed(float speed);
+	void setTarSpeed(int32_t speed);
 	void calcCurSpeed();
 	motorStatus_t runPID();
 
@@ -57,15 +58,17 @@ private:
 
 	float pGain_, iGain_, dGain_;
 	float samplingTime_;
-	float targetSpeed_;
+	int32_t targetSpeedCountsPerStep_;
 	float command_;
-	float error_;
-	float lastError_;
-	float iError_;
-	float dError_;
+	int32_t error_; // counts per step
+	int32_t lastError_; // counts per step
+	int32_t iError_; // counts
+	int32_t dError_; // (counts per step) per step
+	uint16_t curEncCount_;
+	uint16_t lastEncCount_;
 	float cutoffFreq_;
 	float filtConst_;
-	uint8_t dir_;
+	int8_t dir_;
 	uint16_t cmdDutyDenom_;
 	
 	TIM_HandleTypeDef * encTIM_;

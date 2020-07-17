@@ -229,7 +229,6 @@ void TIM1_BRK_TIM9_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim1);
   HAL_TIM_IRQHandler(&htim9);
   /* USER CODE BEGIN TIM1_BRK_TIM9_IRQn 1 */
-  HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
   interruptLink(TIM9_IT);
 
   /* USER CODE END TIM1_BRK_TIM9_IRQn 1 */

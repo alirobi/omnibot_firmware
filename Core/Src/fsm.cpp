@@ -206,12 +206,16 @@ void FSM::fsmAuxStartup(void) {
 	MotorC.arm();
 
 	MotorA.setTarSpeed(10);
+	MotorB.setTarSpeed(10);
+	MotorC.setTarSpeed(10);
 
-	float p = 0.2; // amount of command to increase by for every count per step in error
-	float i = 0.00000;
-	float d = 0;
+	float p = 0.01; // amount of command to increase by for every count per step in error
+	float i = 0.00;
+	float d = 0.00;
 
 	MotorA.setPID(p, i, d);
+	MotorB.setPID(p, i, d);
+	MotorC.setPID(p, i, d);
 	fsmTransition(DRIVE);
 }
 
@@ -223,17 +227,17 @@ void FSM::fsmAuxStartup(void) {
 	*/
 void FSM::fsmDrive(void) {
 	_duty = (_duty < 500) ? 900 : 100;
-	static float cmd = 0.75;
+	static float cmd = 0.3;
 //	cmd = (cmd > 0.75) ? 0.5 : 1;
 	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
 
-//	MotorA.manualCommand(cmd);
-//	MotorB.manualCommand(cmd);
-//	MotorC.manualCommand(cmd);
+	MotorA.manualCommand(cmd);
+	MotorB.manualCommand(cmd);
+	MotorC.manualCommand(cmd);
 
-	MotorA.runPID();
-	MotorB.runPID();
-	MotorC.runPID();
+//	MotorA.runPID();
+//	MotorB.runPID();
+//	MotorC.runPID();
 
 	char msg[] = "Hello Nucleo Nuf!\n\r";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 0xFFFF);

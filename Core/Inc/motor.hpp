@@ -71,6 +71,8 @@ private:
 	int8_t dir_;
 	uint16_t cmdDutyDenom_;
 	
+	int32_t oldSpeed_;
+
 	TIM_HandleTypeDef * encTIM_;
 	TIM_HandleTypeDef * cmd1TIM_;
 	TIMChannel_t cmd1TIMChannel_;

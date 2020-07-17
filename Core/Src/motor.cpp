@@ -143,8 +143,9 @@ motorStatus_t Motor::runPID() {
 //	lastError = error;
 	static float increment = 0;
 	bool zero_crossing;
+	oldSpeed_ = currentSpeed;
 	curEncCount_ = (encTIM_)->Instance->CNT & 0xFFFF;
-	currentSpeed = static_cast<int32_t>(curEncCount_) - static_cast<int32_t>(lastEncCount_);
+	currentSpeed = static_cast<int16_t>(curEncCount_) - static_cast<int16_t>(lastEncCount_);
 	error_ = targetSpeedCountsPerStep_ - currentSpeed;
 	iError_ += error_;
 	dError_ = error_ - lastError_;
@@ -152,17 +153,18 @@ motorStatus_t Motor::runPID() {
 	if (currentSpeed > (targetSpeedCountsPerStep_*2)) {break_test();}
 
 	// Anti-windup
-	zero_crossing = signbit(lastError_) != signbit(error_);
-	if (zero_crossing || error_ == 0) iError_ = 0;
-	iError_ = (iError_ > INTEGRAL_MAX) ? INTEGRAL_MAX : iError_;
-	iError_ = (iError_ < -INTEGRAL_MAX) ? -INTEGRAL_MAX : iError_;
+//	zero_crossing = signbit(lastError_) != signbit(error_);
+//	if (zero_crossing || error_ == 0) iError_ = 0;
+//	iError_ = (iError_ > INTEGRAL_MAX) ? INTEGRAL_MAX : iError_;
+//	iError_ = (iError_ < -INTEGRAL_MAX) ? -INTEGRAL_MAX : iError_;
 
 	lastError_ = error_;
 	lastEncCount_ = curEncCount_;
 
 	increment = pGain_*error_ + iGain_*iError_ - dGain_*dError_;
 
-	command_ += increment;
+//	command_ += increment;
+	command_ = increment;
 
 	command_ = (command_ > 1) ? 1 : command_;
 	command_ = (command_ < -1) ? -1 : command_;

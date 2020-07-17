@@ -205,10 +205,10 @@ void FSM::fsmAuxStartup(void) {
 	MotorB.arm();
 	MotorC.arm();
 
-	MotorA.setTarSpeed(150);
+	MotorA.setTarSpeed(10);
 
-	float p = 0.00001; // amount of command to increase by for every count per step in error
-	float i = 0.000000000;
+	float p = 0.2; // amount of command to increase by for every count per step in error
+	float i = 0.00000;
 	float d = 0;
 
 	MotorA.setPID(p, i, d);

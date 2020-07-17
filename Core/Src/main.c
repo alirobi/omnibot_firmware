@@ -70,12 +70,23 @@ static void MX_TIM5_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM9_Init(void);
 /* USER CODE BEGIN PFP */
-
+uint32_t ADC_DATA[10000];
+uint32_t i = 0;
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+ // Do the adc things
+	if(i < 10000){
+		ADC_DATA[i] = HAL_ADC_GetValue(&hadc1);
+		i++;
+		HAL_ADC_Start_IT(&hadc1);
+	}else{
+		HAL_ADC_Stop_IT(&hadc1);
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -118,6 +129,7 @@ int main(void)
   setup(&hi2c1);
   HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
   TIM_Init(TIM1);
+  HAL_ADC_Start_IT(&hadc1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -561,13 +573,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : MOTOR_C_ARM_Pin MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin */
-  GPIO_InitStruct.Pin = MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin;
+  /*Configure GPIO pins : PC15 MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_15|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

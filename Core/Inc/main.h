@@ -56,8 +56,6 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-void HAL_I2C_ClearBusyFlagErrata_2_14_7(I2C_HandleTypeDef *hi2c);
-void HAL_GPIO_WRITE_ODR(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 
 /* USER CODE END EFP */
 
@@ -74,10 +72,6 @@ void HAL_GPIO_WRITE_ODR(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 #define MOTOR_C_ENC_PHA_GPIO_Port GPIOA
 #define MOTOR_C_ENC_PHB_Pin GPIO_PIN_1
 #define MOTOR_C_ENC_PHB_GPIO_Port GPIOA
-#define MOTOR_C_CMD1_Pin GPIO_PIN_2
-#define MOTOR_C_CMD1_GPIO_Port GPIOA
-#define MOTOR_C_CMD2_Pin GPIO_PIN_3
-#define MOTOR_C_CMD2_GPIO_Port GPIOA
 #define PRIMARY_SPI_BUS_CTRL_SEL_Pin GPIO_PIN_4
 #define PRIMARY_SPI_BUS_CTRL_SEL_GPIO_Port GPIOA
 #define MOTOR_B_ENC_PHA_Pin GPIO_PIN_5
@@ -96,6 +90,8 @@ void HAL_GPIO_WRITE_ODR(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 #define MOTOR_B_CMD2_GPIO_Port GPIOB
 #define TEST_PIN_Pin GPIO_PIN_10
 #define TEST_PIN_GPIO_Port GPIOB
+#define MOTOR_C_ARM_ALT_Pin GPIO_PIN_8
+#define MOTOR_C_ARM_ALT_GPIO_Port GPIOC
 #define MOTOR_A_ENC_PHA_Pin GPIO_PIN_8
 #define MOTOR_A_ENC_PHA_GPIO_Port GPIOA
 #define MOTOR_A_ENC_PHB_Pin GPIO_PIN_9
@@ -108,11 +104,37 @@ void HAL_GPIO_WRITE_ODR(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 #define PRIMARY_SPI_BUS_MOSI_GPIO_Port GPIOC
 #define MOTOR_B_ENC_PHB_Pin GPIO_PIN_3
 #define MOTOR_B_ENC_PHB_GPIO_Port GPIOB
+#define MOTOR_C_CMD1_Pin GPIO_PIN_6
+#define MOTOR_C_CMD1_GPIO_Port GPIOB
+#define MOTOR_C_CMD2_Pin GPIO_PIN_7
+#define MOTOR_C_CMD2_GPIO_Port GPIOB
 #define I2C_BUS_SCL_Pin GPIO_PIN_8
 #define I2C_BUS_SCL_GPIO_Port GPIOB
 #define I2C_BUS_SDA_Pin GPIO_PIN_9
 #define I2C_BUS_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
+#define SDATA_SIZE_BYTES 64
+
+#define MOTOR_A_CMD1_TIMER &htim3
+#define MOTOR_A_CMD1_CHANNEL TIM_CHANNEL_1
+#define MOTOR_A_CMD2_TIMER &htim3
+#define MOTOR_A_CMD2_CHANNEL TIM_CHANNEL_2
+
+#define MOTOR_A_ENC_TIM &htim1
+
+#define MOTOR_B_CMD1_TIMER &htim3
+#define MOTOR_B_CMD1_CHANNEL TIM_CHANNEL_3
+#define MOTOR_B_CMD2_TIMER &htim3
+#define MOTOR_B_CMD2_CHANNEL TIM_CHANNEL_4
+
+#define MOTOR_B_ENC_TIM &htim2
+
+#define MOTOR_C_CMD1_TIMER &htim4
+#define MOTOR_C_CMD1_CHANNEL TIM_CHANNEL_1
+#define MOTOR_C_CMD2_TIMER &htim4
+#define MOTOR_C_CMD2_CHANNEL TIM_CHANNEL_2
+
+#define MOTOR_C_ENC_TIM &htim5
 
 /* USER CODE END Private defines */
 

@@ -14,9 +14,16 @@ extern "C" {
 
 #include "stm32f4xx_hal.h"
 
-void setup(I2C_HandleTypeDef * hi2c_ptr_in);
+typedef enum {
+	SPI3_IT,
+	TIM9_IT
+} interruptLink_t;
+
+void setup(void);
 
 void loop(void);
+
+void interruptLink(interruptLink_t it);
 
 
 #ifdef __cplusplus

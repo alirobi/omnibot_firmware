@@ -1,5 +1,5 @@
-//#include<stdio.h>
-//#include<stdlib.h>
+#ifndef PI2NU_H_
+#define PI2NU_H_
 
 struct pi2nu{
     // Total 42 bytes
@@ -13,9 +13,21 @@ struct pi2nu{
     int8_t vel_c;
     // Error code(State)
     int8_t error;
-    int8_t dummy[36];
+    int8_t dummy[8];
     int8_t checkSum;
 };
+
+void data2pi2nu(struct pi2nu* msg, int8_t vel_a, int8_t vel_b, int8_t vel_c, int8_t error){
+    msg->header = 1;
+    msg->vel_a = vel_a;
+    msg->vel_b = vel_b;
+    msg->vel_c = vel_c;
+    msg->error = error;
+    for(int i = 0; i<8; i++){
+        msg->dummy[i] = 0;
+    }
+    msg->checkSum = vel_a + vel_b + vel_c + error;
+}
 
 struct PID{
     // 42 bytes
@@ -23,11 +35,21 @@ struct PID{
     float pGain;
     float iGain;
     float dGain;
-    int8_t dummy[28];
     int8_t checkSum;
 };
 
-static int8_t pike_buff[11]= {11,12,13,14,15,16,17,18,19,20,'\n'};
+void data2PID(struct PID* msg, float pGain, float iGain, float dGain){
+    msg->header = 2;
+    msg->pGain = pGain;
+    msg->iGain = iGain;
+    msg->dGain = dGain;
+    int8_t* temp = (int8_t*)msg;
+    msg->checkSum = 0;
+    for(int i = 0; i < 13; i++)
+        msg->checkSum += temp[i];
+}
+
+#endif
 
 //int main(){
 //    struct pi2nu *msg;

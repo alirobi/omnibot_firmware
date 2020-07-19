@@ -14,7 +14,7 @@ extern ADC_HandleTypeDef hadc1;
 
 extern I2C_HandleTypeDef hi2c1;
 
-extern SPI_HandleTypeDef hspi3;
+//extern SPI_HandleTypeDef hspi3;
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
@@ -227,9 +227,9 @@ void FSM::fsmAuxStartup(void) {
 	*/
 void FSM::fsmDrive(void) {
 	_duty = (_duty < 500) ? 900 : 100;
-	static float cmd = 0.3;
+	static float cmd = 0.8;
 //	cmd = (cmd > 0.75) ? 0.5 : 1;
-	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+//	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
 
 	MotorA.manualCommand(cmd);
 	MotorB.manualCommand(cmd);
@@ -240,7 +240,7 @@ void FSM::fsmDrive(void) {
 //	MotorC.runPID();
 
 	char msg[] = "Hello Nucleo Nuf!\n\r";
-	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 0xFFFF);
+//	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 0xFFFF);
 }
 
 /**

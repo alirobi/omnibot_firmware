@@ -19,7 +19,7 @@ extern ADC_HandleTypeDef hadc1;
 
 extern I2C_HandleTypeDef hi2c1;
 
-extern SPI_HandleTypeDef hspi3;
+//extern SPI_HandleTypeDef hspi3;
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
@@ -52,8 +52,8 @@ void setup(void) {
 	OmnibotFSM.fsmRun();
 	OmnibotFSM.fsmRun();
 
-	IMU.init(LSM6::deviceAuto, LSM6::sa0Auto, &hi2c1);
-	IMU.enableDefault();
+//	IMU.init(LSM6::deviceAuto, LSM6::sa0Auto, &hi2c1);
+//	IMU.enableDefault();
 
 	MotorA.init();
 	MotorB.init();
@@ -67,8 +67,8 @@ void setup(void) {
   * @retval none
   */
 void loop(void) {
-	IMU.readAcc();
-	IMU.readGyro();
+//	IMU.readAcc();
+//	IMU.readGyro();
 }
 
 /**
@@ -80,17 +80,28 @@ void loop(void) {
   */
 void interruptLink(interruptLink_t it) {
 	switch(it) {
-	case SPI3_IT:
-		// DO SOMETHING WITH spi_data
-		// reset interrupt to top of buffer
-//		HAL_SPI_Receive_IT(&hspi3, spi_data, SDATA_SIZE_BYTES);
-		break;
-	case TIM9_IT:
-		// PRIMARY FSM TASK
-		OmnibotFSM.fsmRun();
-		break;
-	default:
-		break;
+		case SPI3_IT:
+			// DO SOMETHING WITH spi_data
+			// reset interrupt to top of buffer
+	//		HAL_SPI_Receive_IT(&hspi3, spi_data, SDATA_SIZE_BYTES);
+			break;
+		case TIM9_IT:
+			// PRIMARY FSM TASK
+			OmnibotFSM.fsmRun();
+			break;
+		default:
+			break;
+	}
+}
+
+void dmaLink(dmaLink_t dma) {
+	switch(dma) {
+		case UART1_DMA:
+			HAL_UART_Transmit(&huart1, (uint8_t*)sdata, SDATA_SIZE_BYTES, 0xFFFF);
+			HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+			break;
+		default:
+			break;
 	}
 }
 

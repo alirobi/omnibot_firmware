@@ -56,7 +56,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -72,8 +72,6 @@ void Error_Handler(void);
 #define MOTOR_C_ENC_PHA_GPIO_Port GPIOA
 #define MOTOR_C_ENC_PHB_Pin GPIO_PIN_1
 #define MOTOR_C_ENC_PHB_GPIO_Port GPIOA
-#define PRIMARY_SPI_BUS_CTRL_SEL_Pin GPIO_PIN_4
-#define PRIMARY_SPI_BUS_CTRL_SEL_GPIO_Port GPIOA
 #define MOTOR_B_ENC_PHA_Pin GPIO_PIN_5
 #define MOTOR_B_ENC_PHA_GPIO_Port GPIOA
 #define MOTOR_A_CMD1_Pin GPIO_PIN_6

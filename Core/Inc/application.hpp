@@ -19,11 +19,17 @@ typedef enum {
 	TIM9_IT
 } interruptLink_t;
 
+typedef enum {
+	UART1_DMA
+} dmaLink_t;
+
 void setup(void);
 
 void loop(void);
 
 void interruptLink(interruptLink_t it);
+
+void dmaLink(dmaLink_t dma);
 
 
 #ifdef __cplusplus

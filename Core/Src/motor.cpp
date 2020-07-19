@@ -141,7 +141,6 @@ motorStatus_t Motor::runPID() {
 //	dError = filtConst * ((error - lastError) / samplingTime) + (1-filtConst) * dError;
 //	command = pGain*error + iGain*iError + dGain*dError;
 //	lastError = error;
-	static float increment = 0;
 	bool zero_crossing;
 	oldSpeed_ = currentSpeed;
 	curEncCount_ = (encTIM_)->Instance->CNT & 0xFFFF;
@@ -161,10 +160,7 @@ motorStatus_t Motor::runPID() {
 	lastError_ = error_;
 	lastEncCount_ = curEncCount_;
 
-	increment = pGain_*error_ + iGain_*iError_ - dGain_*dError_;
-
-//	command_ += increment;
-	command_ = increment;
+	command_ = pGain_*error_ + iGain_*iError_ - dGain_*dError_;
 
 	command_ = (command_ > 1) ? 1 : command_;
 	command_ = (command_ < -1) ? -1 : command_;

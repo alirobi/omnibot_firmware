@@ -31,6 +31,10 @@ void interruptLink(interruptLink_t it);
 
 void dmaLink(dmaLink_t dma);
 
+//void sendMessageUART(Messaging::Message* msg_buf);
+//
+//void messageReaction(Messaging::Message &msg);
+
 
 #ifdef __cplusplus
 }

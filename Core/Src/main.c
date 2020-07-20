@@ -63,6 +63,7 @@ DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
 uint8_t sdata[SDATA_SIZE_BYTES];
+uint8_t* const sdata_head = sdata;
 /* USER CODE BEGIN PV */
 //int8_t pike_buff[42];
 struct pi2nu *msg;

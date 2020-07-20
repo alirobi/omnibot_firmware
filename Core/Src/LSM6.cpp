@@ -11,8 +11,6 @@
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_def.h>
 #include "main.h"
-//#include <Wire.h>
-//#include <SoftWire.h>
 
 
 #define DS33_SA0_HIGH_ADDRESS 0b1101011

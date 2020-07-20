@@ -13,6 +13,7 @@ extern "C" {
 #include "lsm6.hpp"
 #include "fsm.hpp"
 #include "motor.hpp"
+#include "messaging.hpp"
 #include "main.h"
 
 extern ADC_HandleTypeDef hadc1;
@@ -34,16 +35,27 @@ extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 
 extern uint8_t sdata[SDATA_SIZE_BYTES];
+extern uint8_t* const sdata_head;
 
-LSM6 IMU;
-Motor MotorA(MOTOR_A, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
-Motor MotorB(MOTOR_B, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
-Motor MotorC(MOTOR_C, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
-FSM OmnibotFSM;
+void sendMessageUART(Messaging::Message* msg_buf) {
+	return;
+}
+
+void messageReaction(Messaging::Message &msg) {
+	return;
+}
+
+LSM6      IMU;
+Motor     MotorA(MOTOR_A, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
+Motor     MotorB(MOTOR_B, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
+Motor     MotorC(MOTOR_C, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
+FSM       OmnibotFSM;
+Messaging OmnibotMessaging(&sendMessageUART, &messageReaction);
 
 /**
   * @brief  Executes general startup actions, such as initializing classes
-  * @note	NOT for use in initializing internal MCU modules. See @ref FSM::coreStartup()
+  * @note	NOT for use in initializing internal MCU modules \ 
+	*	@note See @ref FSM::coreStartup()
   * @param  none
   * @retval none
   */
@@ -97,8 +109,9 @@ void interruptLink(interruptLink_t it) {
 void dmaLink(dmaLink_t dma) {
 	switch(dma) {
 		case UART1_DMA:
-			HAL_UART_Transmit(&huart1, (uint8_t*)sdata, SDATA_SIZE_BYTES, 0xFFFF);
-			HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+			// HAL_UART_Transmit(&huart1, (uint8_t*)sdata, SDATA_SIZE_BYTES, 0xFFFF);
+			// HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+			Messaging.rxMessageSequence((uint8_t*)sdata);
 			break;
 		default:
 			break;

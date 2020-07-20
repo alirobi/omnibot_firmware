@@ -54,7 +54,8 @@ Motor::Motor( motorID_t motorID,
 	dError_ = 0;
 
 	cmdDutyDenom_ = 0;
-
+	// TODO: Should we give the class a function pointer instead of giving it all
+	// this low-level stuff?
 	switch (motorID_) {
 	case MOTOR_A:
 		encTIM_         = MOTOR_A_ENC_TIM;

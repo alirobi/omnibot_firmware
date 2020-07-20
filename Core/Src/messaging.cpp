@@ -24,6 +24,7 @@ Messaging::Messaging(void (*sendMessage_fcn)(Message* msg_buf),
 bool Messaging::rxMessageSequence(uint8_t* const serial_data) {
 	if(!parseMessage(serial_data)) return false;
 	if(!reactMessage()) return false;
+	return true;
 }
 
 // will return if the msg is valid and store it in rxLastMessage_
@@ -49,9 +50,25 @@ bool Messaging::checkMessageHash(Message* msg) {
 //  the struct yourself first
 // needs overloaded protos for each msg
 bool Messaging::generateMessage(Message* msg_buf, nu2pi &nu2pi_msg) {
+	msg_buf->msgType = NU2PI;
+	msg_buf->msgLenBytes = sizeof(nu2pi_msg);
+	uint8_t* data = (uint8_t*)(&nu2pi_msg);
+	for (int i = 0; i < msg_buf->msgLenBytes; ++i) {
+		msg_buf->msgData[i] = data[i];
+	}
+	msg_buf->msgHash = DJBHash((msg_buf->msgData), msg_buf->msgLenBytes);
 	return true;
 }
+
+// TODO: Code duplication!!
 bool Messaging::generateMessage(Message* msg_buf, pi2nu &pi2nu_msg) {
+	msg_buf->msgType = PI2NU;
+	msg_buf->msgLenBytes = sizeof(pi2nu_msg);
+	uint8_t* data = (uint8_t*)(&pi2nu_msg);
+	for (int i = 0; i < msg_buf->msgLenBytes; ++i) {
+		msg_buf->msgData[i] = data[i];
+	}
+	msg_buf->msgHash = DJBHash((msg_buf->msgData), msg_buf->msgLenBytes);
 	return true;
 }
 

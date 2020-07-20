@@ -37,13 +37,9 @@ extern DMA_HandleTypeDef hdma_usart2_rx;
 extern uint8_t sdata[SDATA_SIZE_BYTES];
 extern uint8_t* const sdata_head;
 
-void sendMessageUART(Messaging::Message* msg_buf) {
-	return;
-}
+void sendMessageUART(Messaging::Message* msg_buf);
 
-void messageReaction(Messaging::Message &msg) {
-	return;
-}
+void messageReaction(Messaging::Message &msg);
 
 LSM6      IMU;
 Motor     MotorA(MOTOR_A, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
@@ -111,11 +107,25 @@ void dmaLink(dmaLink_t dma) {
 		case UART1_DMA:
 			// HAL_UART_Transmit(&huart1, (uint8_t*)sdata, SDATA_SIZE_BYTES, 0xFFFF);
 			// HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
-			Messaging.rxMessageSequence((uint8_t*)sdata);
+			bool success = OmnibotMessaging.rxMessageSequence((uint8_t*)sdata);
 			break;
-		default:
-			break;
+//		default:
+//			return;
+//			break;
 	}
+}
+
+void sendMessageUART(Messaging::Message* msg_buf) {
+	HAL_UART_Transmit(&huart1, (uint8_t*)msg_buf, SDATA_SIZE_BYTES, 0xFFFF);
+	return;
+}
+
+void messageReaction(Messaging::Message &msg) {
+//	HAL_UART_Transmit(&huart1, (uint8_t*)sdata, SDATA_SIZE_BYTES, 0xFFFF);
+	Messaging::Message temp = msg;
+	OmnibotMessaging.sendMessage(&msg);
+	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+	return;
 }
 
 #ifdef __cplusplus

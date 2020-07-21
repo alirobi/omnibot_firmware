@@ -86,7 +86,9 @@ static void MX_TIM4_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+	uint32_t ADC_DATA[100];
+	uint32_t value;
+	uint32_t i = 0;
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -94,6 +96,28 @@ static void MX_USART1_UART_Init(void);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	return;
+}
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+  //Do what you want on the adc
+	if(hadc->Instance == ADC1 && i < 100){
+		ADC_DATA[i] = HAL_ADC_GetValue(&hadc1);
+		i++;
+		HAL_ADC_Start_IT(&hadc1);
+	}else{
+		HAL_ADC_Stop_IT(&hadc1);
+	}
+
+//	if(HAL_ADC_GetValue(&hadc1) > 1){
+//
+//	}
+//	if(i < 10000){
+//		ADC_DATA[i] = HAL_ADC_GetValue(&hadc1);
+//		i++;
+//		HAL_ADC_Start_IT(&hadc1);
+//	}else{
+//		HAL_ADC_Stop_IT(&hadc1);
+//	}
 }
 /* USER CODE END 0 */
 
@@ -146,6 +170,14 @@ int main(void)
 
   HAL_UART_Receive_IT (&huart1, sdata, SDATA_SIZE_BYTES);
   char data[6] = {0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6};
+
+  HAL_ADC_Start_IT(&hadc1);
+//  for (;;){
+////	  if (HAL_ADC_PollForConversion(&hadc1, 1000000) == HAL_OK){
+//		  ADC_DATA = HAL_ADC_GetValue(&hadc1);
+//          i++;
+////          }
+//      }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -156,6 +188,11 @@ int main(void)
 		cur_cntsB = (MOTOR_B_ENC_TIM)->Instance->CNT & 0xFFFF;
 		cur_cntsC = (MOTOR_C_ENC_TIM)->Instance->CNT & 0xFFFF;
 		loop();
+//		while(HAL_ADC_GetState(&hadc1) != HAL_ADC_STATE_REG_EOC){
+
+//		}
+//		value = HAL_ADC_GetValue(&hadc1);
+//		HAL_ADC_Start(&hadc1);
 		//HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
 //		HAL_UART_Transmit(&huart2, pike_buff, 11, 0xFFFF);
     /* USER CODE END WHILE */
@@ -726,13 +763,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin|MOTOR_C_ARM_ALT_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin|MOTOR_C_ARM_ALT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : MOTOR_C_ARM_Pin MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin MOTOR_C_ARM_ALT_Pin */
-  GPIO_InitStruct.Pin = MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin|MOTOR_C_ARM_ALT_Pin;
+  /*Configure GPIO pins : PC15 MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin MOTOR_C_ARM_ALT_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_15|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin|MOTOR_C_ARM_ALT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

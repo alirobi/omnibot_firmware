@@ -60,8 +60,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define MOTOR_C_ARM_Pin GPIO_PIN_15
-#define MOTOR_C_ARM_GPIO_Port GPIOC
 #define MOTOR_C_CURRENT_MONITOR_Pin GPIO_PIN_1
 #define MOTOR_C_CURRENT_MONITOR_GPIO_Port GPIOC
 #define MOTOR_A_ARM_Pin GPIO_PIN_2
@@ -78,20 +76,20 @@ void Error_Handler(void);
 #define MOTOR_B_ENC_PHA_GPIO_Port GPIOA
 #define MOTOR_A_CMD1_Pin GPIO_PIN_6
 #define MOTOR_A_CMD1_GPIO_Port GPIOA
-#define MOTOR_A_CMD2_Pin GPIO_PIN_7
-#define MOTOR_A_CMD2_GPIO_Port GPIOA
 #define MOTOR_B_CURRENT_MONITOR_Pin GPIO_PIN_4
 #define MOTOR_B_CURRENT_MONITOR_GPIO_Port GPIOC
 #define MOTOR_A_CURRENT_MONITOR_Pin GPIO_PIN_5
 #define MOTOR_A_CURRENT_MONITOR_GPIO_Port GPIOC
 #define MOTOR_B_CMD1_Pin GPIO_PIN_0
 #define MOTOR_B_CMD1_GPIO_Port GPIOB
-#define MOTOR_B_CMD2_Pin GPIO_PIN_1
-#define MOTOR_B_CMD2_GPIO_Port GPIOB
 #define TEST_PIN_Pin GPIO_PIN_10
 #define TEST_PIN_GPIO_Port GPIOB
+#define MOTOR_A_CMD2_Pin GPIO_PIN_7
+#define MOTOR_A_CMD2_GPIO_Port GPIOC
 #define MOTOR_C_ARM_ALT_Pin GPIO_PIN_8
 #define MOTOR_C_ARM_ALT_GPIO_Port GPIOC
+#define MOTOR_B_CMD2_Pin GPIO_PIN_9
+#define MOTOR_B_CMD2_GPIO_Port GPIOC
 #define MOTOR_A_ENC_PHA_Pin GPIO_PIN_8
 #define MOTOR_A_ENC_PHA_GPIO_Port GPIOA
 #define MOTOR_A_ENC_PHB_Pin GPIO_PIN_9

@@ -48,6 +48,8 @@ Motor::Motor( motorID_t motorID,
 	motorStatus_ = MOTOR_DISABLED;
 
 	command_ = 0;
+	commandBase_ = 0;
+	calibrated_ = false;
 	error_ = 0;
 	lastError_ = 0;
 	iError_ = 0;
@@ -92,10 +94,12 @@ Motor::Motor( motorID_t motorID,
 
 motorStatus_t Motor::arm() {
 	HAL_GPIO_WritePin(armPinGPIOPort_, armPinGPIOPin_, GPIO_PIN_SET);
+	return MOTOR_OK;
 }
 
 motorStatus_t Motor::disarm() {
-	//
+	HAL_GPIO_WritePin(armPinGPIOPort_, armPinGPIOPin_, GPIO_PIN_RESET);
+	return MOTOR_OK;
 }
 
 motorStatus_t Motor::init() {
@@ -116,6 +120,18 @@ motorStatus_t Motor::init() {
 	return MOTOR_OK;
 }
 
+bool Motor::calibrate() {
+	if(calibrated_) return true;
+	calcCurSpeed_();
+	if(currentSpeed < 2) commandBase_ += 0.01;
+	else {
+		commandBase_ -= 0.01;
+		return true;
+	}
+	motorCommand(commandBase_);
+	return false;
+}
+
 void Motor::setPID(float p, float i, float d) {
 	pGain_ = p;
 	iGain_ = i;
@@ -123,7 +139,7 @@ void Motor::setPID(float p, float i, float d) {
 }
 
 motorStatus_t Motor::manualCommand(float cmd) {
-	targetSpeedCountsPerStep_ = 0;
+//	targetSpeedCountsPerStep_ = 0;
 	motorCommand(cmd);
 	return MOTOR_OK;
 }
@@ -132,8 +148,9 @@ void Motor::setTarSpeed(int32_t speed) {
 	targetSpeedCountsPerStep_ = speed;
 }
 
-void Motor::calcCurSpeed(){
-	// Read Encoder;
+void Motor::calcCurSpeed_() {
+	curEncCount_ = (encTIM_)->Instance->CNT & 0xFFFF;
+	currentSpeed = static_cast<int16_t>(curEncCount_ - lastEncCount_);
 }
 
 motorStatus_t Motor::runPID() {
@@ -144,28 +161,27 @@ motorStatus_t Motor::runPID() {
 //	lastError = error;
 	bool zero_crossing;
 	oldSpeed_ = currentSpeed;
-	curEncCount_ = (encTIM_)->Instance->CNT & 0xFFFF;
-	currentSpeed = static_cast<int16_t>(curEncCount_) - static_cast<int16_t>(lastEncCount_);
+	calcCurSpeed_();
 	error_ = targetSpeedCountsPerStep_ - currentSpeed;
+//	if (abs(error_) < 1) {
+//		motorCommand(0);
+//		while (1) {}
+//		return MOTOR_OK;
+//	}
 	iError_ += error_;
 	dError_ = error_ - lastError_;
 
-	if (currentSpeed > (targetSpeedCountsPerStep_*2)) {break_test();}
-
-	// Anti-windup
-//	zero_crossing = signbit(lastError_) != signbit(error_);
-//	if (zero_crossing || error_ == 0) iError_ = 0;
-//	iError_ = (iError_ > INTEGRAL_MAX) ? INTEGRAL_MAX : iError_;
-//	iError_ = (iError_ < -INTEGRAL_MAX) ? -INTEGRAL_MAX : iError_;
+	if (currentSpeed > (targetSpeedCountsPerStep_*1.12)) {break_test();}
 
 	lastError_ = error_;
 	lastEncCount_ = curEncCount_;
 
 	command_ = pGain_*error_ + iGain_*iError_ - dGain_*dError_;
-
-	command_ = (command_ > 1) ? 1 : command_;
-	command_ = (command_ < -1) ? -1 : command_;
-
+	if (abs(command_) > 0.01) {
+		command_ += ((command_ > 0) ? commandBase_ : -commandBase_);
+		command_ = (command_ > 1) ? 1 : command_;
+		command_ = (command_ < -1) ? -1 : command_;
+	}
 	motorCommand(command_);
 
 	return MOTOR_OK;

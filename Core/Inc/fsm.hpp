@@ -23,9 +23,10 @@ public:
 		DISABLED,
 		CORE_STARTUP,
 		CONFIG,
-	AUX_STARTUP,
+		AUX_STARTUP,
+		CALIBRATE,
 		DRIVE,
-	STOP,
+		STOP,
 		FAULT
 	};
 
@@ -45,6 +46,7 @@ private:
 	void fsmCoreStartup(void);
 	void fsmConfig(void);
 	void fsmAuxStartup(void);
+	void fsmCalibrate(void);
 	void fsmDrive(void);
 	void fsmStop(void);
 	void fsmFault(void);

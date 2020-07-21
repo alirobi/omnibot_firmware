@@ -122,9 +122,15 @@ void sendMessageUART(Messaging::Message* msg_buf) {
 
 void messageReaction(Messaging::Message &msg) {
 //	HAL_UART_Transmit(&huart1, (uint8_t*)sdata, SDATA_SIZE_BYTES, 0xFFFF);
-	Messaging::Message temp = msg;
-	OmnibotMessaging.sendMessage(&msg);
-	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+	// Messaging::Message temp = msg;
+	// OmnibotMessaging.sendMessage(&msg);
+	// HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
+	if (msg.msgType == Messaging::PI2NU) {
+		pi2nu p2n_msg_data = *((pi2nu*)(msg.msgData));
+		MotorA.setTarSpeed(p2n_msg_data.vel_a);
+		MotorB.setTarSpeed(p2n_msg_data.vel_b);
+		MotorC.setTarSpeed(p2n_msg_data.vel_c);
+	}
 	return;
 }
 

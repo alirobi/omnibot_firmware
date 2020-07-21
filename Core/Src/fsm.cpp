@@ -65,6 +65,9 @@ bool FSM::fsmRun(void) {
 		case AUX_STARTUP:
 			fsmAuxStartup();
 			break;
+		case CALIBRATE:
+			fsmCalibrate();
+			break;
 		case DRIVE:
 			fsmDrive();
 			break;
@@ -115,8 +118,13 @@ bool FSM::fsmTransition(fsmState_t nextState) {
 				validity = VALID_TRANS;
 			}
 			break;
+		case CALIBRATE:
+			if (_curState == AUX_STARTUP || _curState == CONFIG) {
+				validity = VALID_TRANS;
+			}
+			break;
 		case DRIVE:
-			if (_curState == AUX_STARTUP) {
+			if (_curState == AUX_STARTUP || _curState == CALIBRATE) {
 				validity = VALID_TRANS;
 			}
 			break;
@@ -205,19 +213,33 @@ void FSM::fsmAuxStartup(void) {
 	MotorB.arm();
 	MotorC.arm();
 
-	MotorA.setTarSpeed(10);
-	MotorB.setTarSpeed(10);
-	MotorC.setTarSpeed(10);
+	MotorA.setTarSpeed(-30);
+	MotorB.setTarSpeed(30);
+	MotorC.setTarSpeed(30);
 
 	float p = 0.01; // amount of command to increase by for every count per step in error
-	float i = 0.00;
-	float d = 0.00;
+	float i = 0.001;
+	float d = 0.001;
 
 	MotorA.setPID(p, i, d);
 	MotorB.setPID(p, i, d);
 	MotorC.setPID(p, i, d);
-	fsmTransition(DRIVE);
+	fsmTransition(CALIBRATE);
 }
+
+void FSM::fsmCalibrate(void) {
+	bool calA = MotorA.calibrate();
+	bool calB = MotorB.calibrate();
+	bool calC = MotorC.calibrate();
+
+	if (calA && calB && calC) {
+		MotorA.manualCommand(0);
+		MotorB.manualCommand(0);
+		MotorC.manualCommand(0);
+		fsmTransition(DRIVE);
+	}
+}
+
 
 /**
 	* @brief  Normal operation of MCU for application
@@ -231,13 +253,13 @@ void FSM::fsmDrive(void) {
 //	cmd = (cmd > 0.75) ? 0.5 : 1;
 //	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
 
-	MotorA.manualCommand(cmd);
-	MotorB.manualCommand(cmd);
-	MotorC.manualCommand(cmd);
+//	MotorA.manualCommand(cmd);
+//	MotorB.manualCommand(cmd);
+//	MotorC.manualCommand(cmd);
 
-//	MotorA.runPID();
-//	MotorB.runPID();
-//	MotorC.runPID();
+	MotorA.runPID();
+	MotorB.runPID();
+	MotorC.runPID();
 
 	char msg[] = "Hello Nucleo Nuf!\n\r";
 //	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 0xFFFF);

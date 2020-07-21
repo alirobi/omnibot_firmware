@@ -43,12 +43,12 @@ public:
 
 	Motor(motorID_t motorID, float p, float i, float d, float samTime, float cfFreq, uint8_t dir);
 	motorStatus_t init();
+	bool calibrate();
 	motorStatus_t arm();
 	motorStatus_t disarm();
 	void setPID(float p, float i, float d);
 	motorStatus_t manualCommand(float cmd);
 	void setTarSpeed(int32_t speed);
-	void calcCurSpeed();
 	motorStatus_t runPID();
 
 private:
@@ -56,10 +56,13 @@ private:
 	motorStatus_t motorStatus_;
 	motorError_t motorError_;
 
+	bool calibrated_ = false;
+
 	float pGain_, iGain_, dGain_;
 	float samplingTime_;
 	int32_t targetSpeedCountsPerStep_;
 	float command_;
+	float commandBase_;
 	int32_t error_; // counts per step
 	int32_t lastError_; // counts per step
 	int32_t iError_; // counts
@@ -85,6 +88,7 @@ private:
 			TIMChannel_t cmd_channel,
 			float duty_mag);
 	motorStatus_t motorCommand(float cmd);
+	void calcCurSpeed_();
 };
 
 #endif /* INC_MOTOR_HPP_ */

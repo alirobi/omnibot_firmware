@@ -1,0 +1,4 @@
+[submodule "Core/Messaging"]
+	path = Core/Messaging
+	url = https://github.com/karthikurs/OmnibotMessaging.git
+	branch = master

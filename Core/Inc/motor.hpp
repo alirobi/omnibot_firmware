@@ -19,9 +19,9 @@
 #include "stm32f4xx_hal.h"
 
 enum motorID_t {
-	MOTOR_A,
-	MOTOR_B,
-	MOTOR_C
+	MOTOR_U,
+	MOTOR_V,
+	MOTOR_W
 };
 
 enum motorStatus_t {

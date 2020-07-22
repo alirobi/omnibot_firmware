@@ -42,9 +42,9 @@ void sendMessageUART(Messaging::Message* msg_buf);
 void messageReaction(Messaging::Message &msg);
 
 LSM6      IMU;
-Motor     MotorA(MOTOR_A, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
-Motor     MotorB(MOTOR_B, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
-Motor     MotorC(MOTOR_C, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
+Motor     MotorA(MOTOR_U, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
+Motor     MotorB(MOTOR_V, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
+Motor     MotorC(MOTOR_W, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
 FSM       OmnibotFSM;
 Messaging OmnibotMessaging(&sendMessageUART, &messageReaction);
 

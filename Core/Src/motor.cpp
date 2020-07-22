@@ -30,13 +30,11 @@ extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 
-void break_test() {
-	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
-	for (int i = 0; i < 20; i++)
-	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
-	return;
-}
-
+/**
+  * @brief  Motor class constructor
+  * @param  none
+  * @retval none
+  */
 Motor::Motor( motorID_t motorID,
 		float p, float i, float d,
 		float samTime, float cfFreq, uint8_t dir) : 
@@ -59,32 +57,32 @@ Motor::Motor( motorID_t motorID,
 	// TODO: Should we give the class a function pointer instead of giving it all
 	// this low-level stuff?
 	switch (motorID_) {
-	case MOTOR_A:
-		encTIM_         = MOTOR_A_ENC_TIM;
-		cmd1TIM_        = MOTOR_A_CMD1_TIMER;
-		cmd1TIMChannel_ = MOTOR_A_CMD1_CHANNEL;
-		cmd2TIM_        = MOTOR_A_CMD2_TIMER;
-		cmd2TIMChannel_ = MOTOR_A_CMD2_CHANNEL;
-		armPinGPIOPort_ = MOTOR_A_ARM_GPIO_Port;
-		armPinGPIOPin_  = MOTOR_A_ARM_Pin;
+	case MOTOR_U:
+		encTIM_         = MOTOR_U_ENC_TIM;
+		cmd1TIM_        = MOTOR_U_CMD1_TIMER;
+		cmd1TIMChannel_ = MOTOR_U_CMD1_CHANNEL;
+		cmd2TIM_        = MOTOR_U_CMD2_TIMER;
+		cmd2TIMChannel_ = MOTOR_U_CMD2_CHANNEL;
+		armPinGPIOPort_ = MOTOR_U_ARM_GPIO_Port;
+		armPinGPIOPin_  = MOTOR_U_ARM_Pin;
 		break;
-	case MOTOR_B:
-		encTIM_         = MOTOR_B_ENC_TIM;
-		cmd1TIM_        = MOTOR_B_CMD1_TIMER;
-		cmd1TIMChannel_ = MOTOR_B_CMD1_CHANNEL;
-		cmd2TIM_        = MOTOR_B_CMD2_TIMER;
-		cmd2TIMChannel_ = MOTOR_B_CMD2_CHANNEL;
-		armPinGPIOPort_ = MOTOR_B_ARM_GPIO_Port;
-		armPinGPIOPin_  = MOTOR_B_ARM_Pin;
+	case MOTOR_V:
+		encTIM_         = MOTOR_V_ENC_TIM;
+		cmd1TIM_        = MOTOR_V_CMD1_TIMER;
+		cmd1TIMChannel_ = MOTOR_V_CMD1_CHANNEL;
+		cmd2TIM_        = MOTOR_V_CMD2_TIMER;
+		cmd2TIMChannel_ = MOTOR_V_CMD2_CHANNEL;
+		armPinGPIOPort_ = MOTOR_V_ARM_GPIO_Port;
+		armPinGPIOPin_  = MOTOR_V_ARM_Pin;
 		break;
-	case MOTOR_C:
-		encTIM_         = MOTOR_C_ENC_TIM;
-		cmd1TIM_        = MOTOR_C_CMD1_TIMER;
-		cmd1TIMChannel_ = MOTOR_C_CMD1_CHANNEL;
-		cmd2TIM_        = MOTOR_C_CMD2_TIMER;
-		cmd2TIMChannel_ = MOTOR_C_CMD2_CHANNEL;
-		armPinGPIOPort_ = MOTOR_C_ARM_ALT_GPIO_Port;
-		armPinGPIOPin_  = MOTOR_C_ARM_ALT_Pin;
+	case MOTOR_W:
+		encTIM_         = MOTOR_W_ENC_TIM;
+		cmd1TIM_        = MOTOR_W_CMD1_TIMER;
+		cmd1TIMChannel_ = MOTOR_W_CMD1_CHANNEL;
+		cmd2TIM_        = MOTOR_W_CMD2_TIMER;
+		cmd2TIMChannel_ = MOTOR_W_CMD2_CHANNEL;
+		armPinGPIOPort_ = MOTOR_W_ARM_GPIO_Port;
+		armPinGPIOPin_  = MOTOR_W_ARM_Pin;
 		break;
 	default:
 		// TODO
@@ -92,16 +90,31 @@ Motor::Motor( motorID_t motorID,
 	}
 }
 
+/**
+  * @brief  Raises enable pin on motor h-bridges to allow driving
+  * @param  none
+  * @retval Motor Status
+  */
 motorStatus_t Motor::arm() {
 	HAL_GPIO_WritePin(armPinGPIOPort_, armPinGPIOPin_, GPIO_PIN_SET);
 	return MOTOR_OK;
 }
 
+/**
+  * @brief  Lowers enable pin on motor h-bridges to stop driving
+  * @param  none
+  * @retval Motor Status
+  */
 motorStatus_t Motor::disarm() {
 	HAL_GPIO_WritePin(armPinGPIOPort_, armPinGPIOPin_, GPIO_PIN_RESET);
 	return MOTOR_OK;
 }
 
+/**
+  * @brief  Initializes Motor class and does some basic error checking
+  * @param  none
+  * @retval Motor Status
+  */
 motorStatus_t Motor::init() {
 	//Check timer config
 	if (cmd1TIM_->Instance->ARR == 0
@@ -120,6 +133,12 @@ motorStatus_t Motor::init() {
 	return MOTOR_OK;
 }
 
+/**
+  * @brief  Finds motor command deadzone (i.e., the amount of command necessary
+	*         to just start spinning the motor)
+  * @param  none
+  * @retval Motor Status
+  */
 bool Motor::calibrate() {
 	if(calibrated_) return true;
 	calcCurSpeed_();
@@ -132,6 +151,11 @@ bool Motor::calibrate() {
 	return false;
 }
 
+/**
+  * @brief  Set PID controller gains
+  * @param  p
+  * @retval Motor Status
+  */
 void Motor::setPID(float p, float i, float d) {
 	pGain_ = p;
 	iGain_ = i;
@@ -154,30 +178,21 @@ void Motor::calcCurSpeed_() {
 }
 
 motorStatus_t Motor::runPID() {
-//	error = targetSpeed_ - currentSpeed;
-//	iError += (error + lastError) / 2 * samplingTime;
-//	dError = filtConst * ((error - lastError) / samplingTime) + (1-filtConst) * dError;
-//	command = pGain*error + iGain*iError + dGain*dError;
-//	lastError = error;
-	bool zero_crossing;
+	if (targetSpeedCountsPerStep_ == 0) {
+		motorCommand(0);
+		return MOTOR_OK;
+	}
 	oldSpeed_ = currentSpeed;
 	calcCurSpeed_();
 	error_ = targetSpeedCountsPerStep_ - currentSpeed;
-//	if (abs(error_) < 1) {
-//		motorCommand(0);
-//		while (1) {}
-//		return MOTOR_OK;
-//	}
 	iError_ += error_;
 	dError_ = error_ - lastError_;
-
-	if (currentSpeed > (targetSpeedCountsPerStep_*1.12)) {break_test();}
 
 	lastError_ = error_;
 	lastEncCount_ = curEncCount_;
 
 	command_ = pGain_*error_ + iGain_*iError_ - dGain_*dError_;
-	if (abs(command_) > 0.01) {
+	if (abs(command_) > 0) {
 		command_ += ((command_ > 0) ? commandBase_ : -commandBase_);
 		command_ = (command_ > 1) ? 1 : command_;
 		command_ = (command_ < -1) ? -1 : command_;
@@ -189,10 +204,11 @@ motorStatus_t Motor::runPID() {
 
 motorStatus_t Motor::writePWMDuty(TIM_HandleTypeDef * cmd_htim_ptr,
 		TIMChannel_t cmd_channel, 
-		float duty_mag) {
+		float cmd_mag) {
 	motorStatus_t status = MOTOR_OK;
-	uint16_t duty_counts = (static_cast<uint16_t>(duty_mag * cmdDutyDenom_)) & 0xFFFF;
-	if (duty_mag > 1.001*CMD_UPPER_LIM || duty_mag < 0) {
+	uint16_t duty_counts = 
+	         (static_cast<uint16_t>(cmd_mag * cmdDutyDenom_)) & 0xFFFF;
+	if (cmd_mag > 1.001*CMD_UPPER_LIM || cmd_mag < 0) {
 		motorError_ = COMMAND_MAG_TOO_HIGH_ERR;
 		duty_counts = 0;
 		status = MOTOR_ERROR;

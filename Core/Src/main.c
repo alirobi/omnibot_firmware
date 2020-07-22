@@ -156,9 +156,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		cur_cntsA = (MOTOR_A_ENC_TIM)->Instance->CNT & 0xFFFF;
-		cur_cntsB = (MOTOR_B_ENC_TIM)->Instance->CNT & 0xFFFF;
-		cur_cntsC = (MOTOR_C_ENC_TIM)->Instance->CNT & 0xFFFF;
+		cur_cntsA = (MOTOR_U_ENC_TIM)->Instance->CNT & 0xFFFF;
+		cur_cntsB = (MOTOR_V_ENC_TIM)->Instance->CNT & 0xFFFF;
+		cur_cntsC = (MOTOR_W_ENC_TIM)->Instance->CNT & 0xFFFF;
 		loop();
     /* USER CODE END WHILE */
 
@@ -693,13 +693,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin|MOTOR_C_ARM_ALT_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, MOTOR_U_ARM_Pin|MOTOR_V_ARM_Pin|MOTOR_W_ARM_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : MOTOR_C_ARM_Pin MOTOR_A_ARM_Pin MOTOR_B_ARM_Pin MOTOR_C_ARM_ALT_Pin */
-  GPIO_InitStruct.Pin = MOTOR_C_ARM_Pin|MOTOR_A_ARM_Pin|MOTOR_B_ARM_Pin|MOTOR_C_ARM_ALT_Pin;
+  /*Configure GPIO pins : MOTOR_U_ARM_Pin MOTOR_V_ARM_Pin MOTOR_W_ARM_Pin */
+  GPIO_InitStruct.Pin = MOTOR_U_ARM_Pin|MOTOR_V_ARM_Pin|MOTOR_W_ARM_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

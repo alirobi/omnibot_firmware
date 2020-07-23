@@ -43,51 +43,7 @@ Motor::Motor( motorID_t motorID,
 		samplingTime_(samTime), cutoffFreq_(cfFreq), dir_(dir) {
 	
 	filtConst_ = exp(-cutoffFreq_*samplingTime_);
-	motorStatus_ = MOTOR_DISABLED;
-
-	command_ = 0;
-	commandBase_ = 0;
-	calibrated_ = false;
-	error_ = 0;
-	lastError_ = 0;
-	iError_ = 0;
-	dError_ = 0;
-
-	cmdDutyDenom_ = 0;
-	// TODO: Should we give the class a function pointer instead of giving it all
-	// this low-level stuff?
-	switch (motorID_) {
-	case MOTOR_U:
-		encTIM_         = MOTOR_U_ENC_TIM;
-		cmd1TIM_        = MOTOR_U_CMD1_TIMER;
-		cmd1TIMChannel_ = MOTOR_U_CMD1_CHANNEL;
-		cmd2TIM_        = MOTOR_U_CMD2_TIMER;
-		cmd2TIMChannel_ = MOTOR_U_CMD2_CHANNEL;
-		armPinGPIOPort_ = MOTOR_U_ARM_GPIO_Port;
-		armPinGPIOPin_  = MOTOR_U_ARM_Pin;
-		break;
-	case MOTOR_V:
-		encTIM_         = MOTOR_V_ENC_TIM;
-		cmd1TIM_        = MOTOR_V_CMD1_TIMER;
-		cmd1TIMChannel_ = MOTOR_V_CMD1_CHANNEL;
-		cmd2TIM_        = MOTOR_V_CMD2_TIMER;
-		cmd2TIMChannel_ = MOTOR_V_CMD2_CHANNEL;
-		armPinGPIOPort_ = MOTOR_V_ARM_GPIO_Port;
-		armPinGPIOPin_  = MOTOR_V_ARM_Pin;
-		break;
-	case MOTOR_W:
-		encTIM_         = MOTOR_W_ENC_TIM;
-		cmd1TIM_        = MOTOR_W_CMD1_TIMER;
-		cmd1TIMChannel_ = MOTOR_W_CMD1_CHANNEL;
-		cmd2TIM_        = MOTOR_W_CMD2_TIMER;
-		cmd2TIMChannel_ = MOTOR_W_CMD2_CHANNEL;
-		armPinGPIOPort_ = MOTOR_W_ARM_GPIO_Port;
-		armPinGPIOPin_  = MOTOR_W_ARM_Pin;
-		break;
-	default:
-		// TODO
-		break;
-	}
+	remap(motorID);
 }
 
 /**
@@ -106,8 +62,21 @@ motorStatus_t Motor::arm() {
   * @retval Motor Status
   */
 motorStatus_t Motor::disarm() {
+	motorStatus_ = MOTOR_DISABLED;
+	pidDisable();
 	HAL_GPIO_WritePin(armPinGPIOPort_, armPinGPIOPin_, GPIO_PIN_RESET);
 	return MOTOR_OK;
+}
+
+motorStatus_t Motor::getStatus() {
+	return motorStatus_;
+}
+motorStatus_t Motor::pidEnable() {
+	pidEnabled_ = true;
+}
+motorStatus_t Motor::pidDisable() {
+	pidEnabled_ = false;
+
 }
 
 /**
@@ -163,13 +132,13 @@ void Motor::setPID(float p, float i, float d) {
 }
 
 motorStatus_t Motor::manualCommand(float cmd) {
-//	targetSpeedCountsPerStep_ = 0;
+	pidDisable();
 	motorCommand(cmd);
 	return MOTOR_OK;
 }
 
-void Motor::setTarSpeed(int32_t speed) {
-	targetSpeedCountsPerStep_ = speed;
+void Motor::setTargetSpeed(int32_t speed) {
+	targetSpeed_ = speed;
 }
 
 void Motor::calcCurSpeed_() {
@@ -178,13 +147,15 @@ void Motor::calcCurSpeed_() {
 }
 
 motorStatus_t Motor::runPID() {
-	if (targetSpeedCountsPerStep_ == 0) {
+	if (!pidEnabled_) return MOTOR_OK;
+
+	if (targetSpeed_ == 0) {
 		motorCommand(0);
 		return MOTOR_OK;
 	}
 	oldSpeed_ = currentSpeed;
 	calcCurSpeed_();
-	error_ = targetSpeedCountsPerStep_ - currentSpeed;
+	error_ = targetSpeed_ - currentSpeed;
 	iError_ += error_;
 	dError_ = error_ - lastError_;
 
@@ -201,6 +172,56 @@ motorStatus_t Motor::runPID() {
 
 	return MOTOR_OK;
 }
+
+motorStatus_t Motor::remap(motorID_t newMotor) {
+	disarm();
+	motorStatus_ = MOTOR_DISABLED;
+
+	command_ = 0;
+	commandBase_ = 0;
+	calibrated_ = false;
+	error_ = 0;
+	lastError_ = 0;
+	iError_ = 0;
+	dError_ = 0;
+
+	cmdDutyDenom_ = 0;
+	// TODO: Should we give the class a function pointer instead of giving it all
+	// this low-level stuff?
+	switch (newMotor) {
+	case MOTOR_U:
+		encTIM_         = MOTOR_U_ENC_TIM;
+		cmd1TIM_        = MOTOR_U_CMD1_TIMER;
+		cmd1TIMChannel_ = MOTOR_U_CMD1_CHANNEL;
+		cmd2TIM_        = MOTOR_U_CMD2_TIMER;
+		cmd2TIMChannel_ = MOTOR_U_CMD2_CHANNEL;
+		armPinGPIOPort_ = MOTOR_U_ARM_GPIO_Port;
+		armPinGPIOPin_  = MOTOR_U_ARM_Pin;
+		break;
+	case MOTOR_V:
+		encTIM_         = MOTOR_V_ENC_TIM;
+		cmd1TIM_        = MOTOR_V_CMD1_TIMER;
+		cmd1TIMChannel_ = MOTOR_V_CMD1_CHANNEL;
+		cmd2TIM_        = MOTOR_V_CMD2_TIMER;
+		cmd2TIMChannel_ = MOTOR_V_CMD2_CHANNEL;
+		armPinGPIOPort_ = MOTOR_V_ARM_GPIO_Port;
+		armPinGPIOPin_  = MOTOR_V_ARM_Pin;
+		break;
+	case MOTOR_W:
+		encTIM_         = MOTOR_W_ENC_TIM;
+		cmd1TIM_        = MOTOR_W_CMD1_TIMER;
+		cmd1TIMChannel_ = MOTOR_W_CMD1_CHANNEL;
+		cmd2TIM_        = MOTOR_W_CMD2_TIMER;
+		cmd2TIMChannel_ = MOTOR_W_CMD2_CHANNEL;
+		armPinGPIOPort_ = MOTOR_W_ARM_GPIO_Port;
+		armPinGPIOPin_  = MOTOR_W_ARM_Pin;
+		break;
+	default:
+		// TODO
+		break;
+	}
+}
+
 
 motorStatus_t Motor::writePWMDuty(TIM_HandleTypeDef * cmd_htim_ptr,
 		TIMChannel_t cmd_channel, 

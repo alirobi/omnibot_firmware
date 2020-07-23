@@ -26,7 +26,7 @@ public:
 		AUX_STARTUP,
 		CALIBRATE,
 		DRIVE,
-		STOP,
+		STOP_IDLE,
 		FAULT
 	};
 
@@ -35,6 +35,8 @@ public:
 	bool fsmRun(void);
 
 	bool fsmTransition(fsmState_t nextState);
+
+	fsmState_t getCurState();
 
 private:
 	fsmState_t _curState;
@@ -48,7 +50,7 @@ private:
 	void fsmAuxStartup(void);
 	void fsmCalibrate(void);
 	void fsmDrive(void);
-	void fsmStop(void);
+	void fsmStopIdle(void);
 	void fsmFault(void);
 };
 

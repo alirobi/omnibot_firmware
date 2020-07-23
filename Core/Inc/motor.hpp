@@ -18,7 +18,7 @@
 #include "main.h"
 #include "stm32f4xx_hal.h"
 
-enum motorID_t {
+enum motorID_t : uint8_t {
 	MOTOR_U,
 	MOTOR_V,
 	MOTOR_W
@@ -46,10 +46,14 @@ public:
 	bool calibrate();
 	motorStatus_t arm();
 	motorStatus_t disarm();
+	motorStatus_t getStatus();
+	motorStatus_t pidEnable();
+	motorStatus_t pidDisable();
 	void setPID(float p, float i, float d);
 	motorStatus_t manualCommand(float cmd);
-	void setTarSpeed(int32_t speed);
+	void setTargetSpeed(int32_t speed);
 	motorStatus_t runPID();
+	motorStatus_t remap(motorID_t newMotor);
 
 private:
 	motorID_t motorID_;
@@ -58,9 +62,11 @@ private:
 
 	bool calibrated_ = false;
 
+	bool pidEnabled_ = false;
+
 	float pGain_, iGain_, dGain_;
 	float samplingTime_;
-	int32_t targetSpeedCountsPerStep_;
+	int32_t targetSpeed_;
 	float command_;
 	float commandBase_;
 	int32_t error_; // counts per step
@@ -69,12 +75,12 @@ private:
 	int32_t dError_; // (counts per step) per step
 	uint16_t curEncCount_;
 	uint16_t lastEncCount_;
+	int32_t oldSpeed_;
 	float cutoffFreq_;
 	float filtConst_;
 	int8_t dir_;
 	uint16_t cmdDutyDenom_;
 	
-	int32_t oldSpeed_;
 
 	TIM_HandleTypeDef * encTIM_;
 	TIM_HandleTypeDef * cmd1TIM_;

@@ -39,14 +39,14 @@ extern uint8_t* const sdata_head;
 
 void sendMessageUART(Messaging::Message* msg_buf);
 
-void messageReaction(Messaging::Message &msg);
+void rxMsgCallback(Messaging::Message &msg);
 
 LSM6      IMU;
 Motor     MotorA(MOTOR_U, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
 Motor     MotorB(MOTOR_V, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
 Motor     MotorC(MOTOR_W, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
 FSM       OmnibotFSM;
-Messaging OmnibotMessaging(&sendMessageUART, &messageReaction);
+Messaging OmnibotMessaging(&sendMessageUART, &rxMsgCallback);
 
 /**
   * @brief  Executes general startup actions, such as initializing classes
@@ -59,6 +59,19 @@ void setup(void) {
 
 	OmnibotFSM.fsmRun();
 	OmnibotFSM.fsmRun();
+
+	velocityCmd velocityCmd_msg;
+	uint8_t size1 = sizeof(velocityCmd_msg);
+	manualCmd manualCmd_msg;
+	uint8_t size2 = sizeof(manualCmd_msg);
+	heartbeat heartbeat_msg;
+	uint8_t size3 = sizeof(heartbeat_msg);
+	motorRemap motorRemap_msg;
+	uint8_t size4 = sizeof(motorRemap_msg);
+	globalPID globalPID_msg;
+	uint8_t size5 = sizeof(globalPID_msg);
+	singlePID singlePID_msg;
+	uint8_t size6 = sizeof(singlePID_msg);
 
 //	IMU.init(LSM6::deviceAuto, LSM6::sa0Auto, &hi2c1);
 //	IMU.enableDefault();
@@ -88,11 +101,6 @@ void loop(void) {
   */
 void interruptLink(interruptLink_t it) {
 	switch(it) {
-		case SPI3_IT:
-			// DO SOMETHING WITH spi_data
-			// reset interrupt to top of buffer
-	//		HAL_SPI_Receive_IT(&hspi3, spi_data, SDATA_SIZE_BYTES);
-			break;
 		case TIM9_IT:
 			// PRIMARY FSM TASK
 			OmnibotFSM.fsmRun();
@@ -105,14 +113,13 @@ void interruptLink(interruptLink_t it) {
 void dmaLink(dmaLink_t dma) {
 	switch(dma) {
 		case UART1_DMA:
-			// HAL_UART_Transmit(&huart1, (uint8_t*)sdata, SDATA_SIZE_BYTES, 0xFFFF);
-			// HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
 			bool success = OmnibotMessaging.rxMessageSequence((uint8_t*)sdata);
 			break;
 //		default:
 //			return;
 //			break;
 	}
+	return;
 }
 
 void sendMessageUART(Messaging::Message* msg_buf) {
@@ -120,16 +127,85 @@ void sendMessageUART(Messaging::Message* msg_buf) {
 	return;
 }
 
-void messageReaction(Messaging::Message &msg) {
-//	HAL_UART_Transmit(&huart1, (uint8_t*)sdata, SDATA_SIZE_BYTES, 0xFFFF);
-	// Messaging::Message temp = msg;
-	// OmnibotMessaging.sendMessage(&msg);
-	// HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
-	if (msg.msgType == Messaging::PI2NU) {
-		pi2nu p2n_msg_data = *((pi2nu*)(msg.msgData));
-		MotorA.setTarSpeed(p2n_msg_data.vel_a);
-		MotorB.setTarSpeed(p2n_msg_data.vel_b);
-		MotorC.setTarSpeed(p2n_msg_data.vel_c);
+void rxMsgCallback(Messaging::Message &msg) {
+
+	switch(msg.msgType) {
+		case Messaging::VELOCITY_CMD: {
+			MotorA.pidEnable();
+			MotorB.pidEnable();
+			MotorC.pidEnable();
+
+			velocityCmd velocityCmd_data = *((velocityCmd*)(msg.msgData));
+			
+			MotorA.setTargetSpeed(velocityCmd_data.vel_a);
+			MotorB.setTargetSpeed(velocityCmd_data.vel_b);
+			MotorC.setTargetSpeed(velocityCmd_data.vel_c);
+
+		}break;
+		case Messaging::MANUAL_CMD: {
+			MotorA.pidDisable();
+			MotorB.pidDisable();
+			MotorC.pidDisable();
+
+			manualCmd manualCmd_data = *((manualCmd*)(msg.msgData));
+
+			MotorA.manualCommand(manualCmd_data.cmd_a);
+			MotorB.manualCommand(manualCmd_data.cmd_b);
+			MotorC.manualCommand(manualCmd_data.cmd_c);
+
+		}break;
+		case Messaging::HEARTBEAT: {
+			heartbeat heartbeat_data = *((heartbeat*)(msg.msgData));
+			if (!heartbeat_data.beat) OmnibotFSM.fsmTransition(FSM::STOP_IDLE);
+		}break;
+		case Messaging::STATE_TRANSITION: {
+		}break;
+		case Messaging::MOTOR_REMAP: {
+		}break;
+		case Messaging::GLOBAL_PID: {
+			OmnibotFSM.fsmTransition(FSM::STOP_IDLE);
+			OmnibotFSM.fsmTransition(FSM::CONFIG);
+
+			globalPID globalPID_data = *((globalPID*)(msg.msgData));
+
+			MotorA.setPID(globalPID_data.pGain,
+			              globalPID_data.iGain,
+			              globalPID_data.dGain);
+			MotorB.setPID(globalPID_data.pGain,
+			              globalPID_data.iGain,
+			              globalPID_data.dGain);
+			MotorC.setPID(globalPID_data.pGain,
+			              globalPID_data.iGain,
+			              globalPID_data.dGain);
+		}break;
+		case Messaging::SINGLE_PID: {
+			OmnibotFSM.fsmTransition(FSM::STOP_IDLE);
+			OmnibotFSM.fsmTransition(FSM::CONFIG);
+
+			singlePID singlePID_data = *((singlePID*)(msg.msgData));
+
+			switch (singlePID_data.motorID) {
+				case 0:
+					MotorA.setPID(singlePID_data.pGain,
+			                  singlePID_data.iGain,
+			                  singlePID_data.dGain);
+					break;
+				case 1:
+					MotorA.setPID(singlePID_data.pGain,
+			                  singlePID_data.iGain,
+			                  singlePID_data.dGain);
+					break;
+				case 2:
+					MotorA.setPID(singlePID_data.pGain,
+			                  singlePID_data.iGain,
+			                  singlePID_data.dGain);
+					break;
+			}
+		}break;
+		case Messaging::NULLMSG: {
+		}break;
+		default: {
+		}break;
 	}
 	return;
 }

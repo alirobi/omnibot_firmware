@@ -25,8 +25,6 @@
 /* USER CODE BEGIN Includes */
 #include <application.hpp>
 #include <string.h>
-#include <pi2nu.h>
-#include <nu2pi.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,9 +63,7 @@ DMA_HandleTypeDef hdma_usart2_rx;
 uint8_t sdata[SDATA_SIZE_BYTES];
 uint8_t* const sdata_head = sdata;
 /* USER CODE BEGIN PV */
-//int8_t pike_buff[42];
-struct pi2nu *msg;
-struct nu2pi msg2pi;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

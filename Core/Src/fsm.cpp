@@ -71,14 +71,14 @@ bool FSM::fsmRun(void) {
 		case DRIVE:
 			fsmDrive();
 			break;
-		case STOP:
-			fsmStop();
+		case STOP_IDLE:
+			fsmStopIdle();
 			break;
 		case FAULT:
 			fsmFault();
 			break;
 		default:
-			fsmTransition(STOP);
+			fsmTransition(STOP_IDLE);
 			break;
 	}
 	_busy = false;
@@ -96,9 +96,9 @@ bool FSM::fsmTransition(fsmState_t nextState) {
 	bool validity = INVALID_TRANS;
 	switch(nextState) {
 		case DISABLED:
-			if (_curState == STOP) {
+			if (_curState == STOP_IDLE) {
 				// FSM will start in DISABLE, but otherwise should only get here
-				// after a STOP routine
+				// after a STOP_IDLE routine
 				validity = VALID_TRANS;
 			}
 			break;
@@ -108,7 +108,7 @@ bool FSM::fsmTransition(fsmState_t nextState) {
 			}
 			break;
 		case CONFIG:
-			if (_curState == STOP) {
+			if (_curState == STOP_IDLE) {
 				// CONFIG should only occur after a STOP
 				validity = VALID_TRANS;
 			}
@@ -128,7 +128,7 @@ bool FSM::fsmTransition(fsmState_t nextState) {
 				validity = VALID_TRANS;
 			}
 			break;
-		case STOP:
+		case STOP_IDLE:
 			validity = VALID_TRANS;
 			break;
 		case FAULT:
@@ -142,6 +142,11 @@ bool FSM::fsmTransition(fsmState_t nextState) {
 	}
 	return validity;
 }
+
+FSM::fsmState_t FSM::getCurState() {
+	return _curState;
+}
+
 
 //TODO: Implement these properly:
 
@@ -163,20 +168,15 @@ void FSM::fsmDisable(void) {
 	*/
 void FSM::fsmCoreStartup(void) {
 
-	HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
-
-	// Start timer for timed interrupt for FSM task
-	HAL_TIM_Base_Start_IT(&htim9);
-
 	// Motor encoders ready to read
 	HAL_TIM_Encoder_Start(MOTOR_U_ENC_TIM, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(MOTOR_V_ENC_TIM, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(MOTOR_W_ENC_TIM, TIM_CHANNEL_ALL);
 
 	// Motors disarmed
-	HAL_GPIO_WritePin(MOTOR_U_ARM_GPIO_Port, MOTOR_U_ARM_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(MOTOR_V_ARM_GPIO_Port, MOTOR_V_ARM_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(MOTOR_W_ARM_GPIO_Port, MOTOR_W_ARM_Pin, GPIO_PIN_RESET);
+	MotorA.disarm();
+	MotorB.disarm();
+	MotorC.disarm();
 
 	// Motor command PWM generation -- initialized at 0% duty cycle
 	HAL_TIM_PWM_Start(MOTOR_U_CMD1_TIMER, MOTOR_U_CMD1_CHANNEL);
@@ -187,6 +187,9 @@ void FSM::fsmCoreStartup(void) {
 
 	HAL_TIM_PWM_Start(MOTOR_W_CMD1_TIMER, MOTOR_W_CMD1_CHANNEL);
 	HAL_TIM_PWM_Start(MOTOR_W_CMD2_TIMER, MOTOR_W_CMD2_CHANNEL);
+
+	// Start timer for timed interrupt for FSM task
+	HAL_TIM_Base_Start_IT(&htim9);
 
 	// Auto transition
 	fsmTransition(AUX_STARTUP);
@@ -199,7 +202,7 @@ void FSM::fsmCoreStartup(void) {
 	* @retval none
 	*/
 void FSM::fsmConfig(void) {
-
+	HAL_TIM_Base_Stop_IT(&htim9);
 }
 
 /**
@@ -212,10 +215,6 @@ void FSM::fsmAuxStartup(void) {
 	MotorA.arm();
 	MotorB.arm();
 	MotorC.arm();
-//
-//	MotorA.setTarSpeed(-30);
-//	MotorB.setTarSpeed(30);
-//	MotorC.setTarSpeed(30);
 
 	float p = 0.01; // amount of command to increase by for every count per step in error
 	float i = 0.001;
@@ -261,8 +260,10 @@ void FSM::fsmDrive(void) {
 	* @param  none
 	* @retval none
 	*/
-void FSM::fsmStop(void) {
-
+void FSM::fsmStopIdle(void) {
+	MotorA.disarm();
+	MotorB.disarm();
+	MotorC.disarm();
 }
 
 /**

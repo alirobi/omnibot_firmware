@@ -39,12 +39,10 @@ public:
 	fsmState_t getCurState();
 
 private:
-	fsmState_t _curState;
-	bool _busy = false;
+	fsmState_t curState_;
+	bool busy_ = false;
 
-	uint16_t _duty = 250;
-
-	void fsmDisable(void);
+	void fsmDisabled(void);
 	void fsmCoreStartup(void);
 	void fsmConfig(void);
 	void fsmAuxStartup(void);

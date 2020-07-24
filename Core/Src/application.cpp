@@ -57,8 +57,15 @@ Messaging OmnibotMessaging(&sendMessageUART, &rxMsgCallback);
   */
 void setup(void) {
 
+	// run what's defined in fsmDisabled
 	OmnibotFSM.fsmRun();
+	// transition to coreStartup
+
+	// run what's defined in fsmCoreStartup
 	OmnibotFSM.fsmRun();
+	// transition to stop idle
+	// timer has started so now FSM will just run. It won't be doing anything
+	// without another stateTransition
 
 	velocityCmd velocityCmd_msg;
 	uint8_t size1 = sizeof(velocityCmd_msg);
@@ -72,6 +79,8 @@ void setup(void) {
 	uint8_t size5 = sizeof(globalPID_msg);
 	singlePID singlePID_msg;
 	uint8_t size6 = sizeof(singlePID_msg);
+	nucleoGeneralUpdate nucleoGeneralUpdate_msg;
+	uint8_t size7 = sizeof(nucleoGeneralUpdate_msg);
 
 //	IMU.init(LSM6::deviceAuto, LSM6::sa0Auto, &hi2c1);
 //	IMU.enableDefault();
@@ -141,6 +150,13 @@ void rxMsgCallback(Messaging::Message &msg) {
 			MotorB.setTargetSpeed(velocityCmd_data.vel_b);
 			MotorC.setTargetSpeed(velocityCmd_data.vel_c);
 
+			if (!OmnibotFSM.fsmTransition(FSM::DRIVE)) {
+				if (!OmnibotFSM.fsmTransition(FSM::AUX_STARTUP)) {
+					if (!OmnibotFSM.fsmTransition(FSM::AUX_STARTUP)) {
+						while (1) {}
+					}
+				}
+			}
 		}break;
 		case Messaging::MANUAL_CMD: {
 			MotorA.pidDisable();
@@ -153,6 +169,7 @@ void rxMsgCallback(Messaging::Message &msg) {
 			MotorB.manualCommand(manualCmd_data.cmd_b);
 			MotorC.manualCommand(manualCmd_data.cmd_c);
 
+			OmnibotFSM.fsmTransition(FSM::DRIVE);
 		}break;
 		case Messaging::HEARTBEAT: {
 			heartbeat heartbeat_data = *((heartbeat*)(msg.msgData));

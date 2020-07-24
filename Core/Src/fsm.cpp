@@ -40,7 +40,7 @@ extern Motor MotorC;
 	* @param  none
 	* @retval none
 	*/
-FSM::FSM(void) : _curState{DISABLED} {}
+FSM::FSM(void) : curState_{DISABLED} {}
 
 
 /**
@@ -50,12 +50,12 @@ FSM::FSM(void) : _curState{DISABLED} {}
 	* @retval successful execution of FSM step
 	*/
 bool FSM::fsmRun(void) {
-	if (_busy) return false;
-	_busy = true;
-	switch(_curState) {
-	case DISABLED:
-		fsmDisable();
-		break;
+	if (busy_) return false;
+	busy_ = true;
+	switch(curState_) {
+		case DISABLED:
+			fsmDisabled();
+			break;
 		case CORE_STARTUP:
 			fsmCoreStartup();
 			break;
@@ -81,7 +81,7 @@ bool FSM::fsmRun(void) {
 			fsmTransition(STOP_IDLE);
 			break;
 	}
-	_busy = false;
+	busy_ = false;
 	return true;
 }
 
@@ -94,37 +94,38 @@ bool FSM::fsmRun(void) {
 	*/
 bool FSM::fsmTransition(fsmState_t nextState) {
 	bool validity = INVALID_TRANS;
+	if (nextState == curState_) return VALID_TRANS;
 	switch(nextState) {
 		case DISABLED:
-			if (_curState == STOP_IDLE) {
+			if (curState_ == STOP_IDLE) {
 				// FSM will start in DISABLE, but otherwise should only get here
 				// after a STOP_IDLE routine
 				validity = VALID_TRANS;
 			}
 			break;
 		case CORE_STARTUP:
-			if (_curState == DISABLED) {
+			if (curState_ == DISABLED) {
 				validity = VALID_TRANS;
 			}
 			break;
 		case CONFIG:
-			if (_curState == STOP_IDLE) {
+			if (curState_ == STOP_IDLE) {
 				// CONFIG should only occur after a STOP
 				validity = VALID_TRANS;
 			}
 			break;
 		case AUX_STARTUP:
-			if (_curState == CORE_STARTUP || _curState == CONFIG) {
+			if (curState_ == STOP_IDLE) {
 				validity = VALID_TRANS;
 			}
 			break;
 		case CALIBRATE:
-			if (_curState == AUX_STARTUP || _curState == CONFIG) {
+			if (curState_ == AUX_STARTUP || curState_ == STOP_IDLE) {
 				validity = VALID_TRANS;
 			}
 			break;
 		case DRIVE:
-			if (_curState == AUX_STARTUP || _curState == CALIBRATE) {
+			if (curState_ == AUX_STARTUP || curState_ == CALIBRATE) {
 				validity = VALID_TRANS;
 			}
 			break;
@@ -138,13 +139,13 @@ bool FSM::fsmTransition(fsmState_t nextState) {
 			break;
 	}
 	if (validity) {
-		_curState = nextState;
+		curState_ = nextState;
 	}
 	return validity;
 }
 
 FSM::fsmState_t FSM::getCurState() {
-	return _curState;
+	return curState_;
 }
 
 
@@ -156,7 +157,7 @@ FSM::fsmState_t FSM::getCurState() {
 	* @param  none
 	* @retval none
 	*/
-void FSM::fsmDisable(void) {
+void FSM::fsmDisabled(void) {
 	fsmTransition(CORE_STARTUP);
 }
 
@@ -192,7 +193,7 @@ void FSM::fsmCoreStartup(void) {
 	HAL_TIM_Base_Start_IT(&htim9);
 
 	// Auto transition
-	fsmTransition(AUX_STARTUP);
+	fsmTransition(STOP_IDLE);
 }
 
 /**
@@ -203,6 +204,8 @@ void FSM::fsmCoreStartup(void) {
 	*/
 void FSM::fsmConfig(void) {
 	HAL_TIM_Base_Stop_IT(&htim9);
+	fsmTransition(STOP_IDLE);
+	HAL_TIM_Base_Start_IT(&htim9);
 }
 
 /**
@@ -239,7 +242,6 @@ void FSM::fsmCalibrate(void) {
 	}
 }
 
-
 /**
 	* @brief  Normal operation of MCU for application
 	* @note
@@ -247,11 +249,23 @@ void FSM::fsmCalibrate(void) {
 	* @retval none
 	*/
 void FSM::fsmDrive(void) {
+//	bool calA = MotorA.calibrate();
+//	bool calB = MotorB.calibrate();
+//	bool calC = MotorC.calibrate();
+//
+//	if (!calA || !calB || !calC) {
+//		MotorA.manualCommand(0);
+//		MotorB.manualCommand(0);
+//		MotorC.manualCommand(0);
+//		// TODO: this should actually just transition to calibrate, but we need
+//		// to trigger aux startup from pi with a msg which is not implementd yet
+//		fsmTransition(AUX_STARTUP);
+//		return;
+//	}
 
 	MotorA.runPID();
 	MotorB.runPID();
 	MotorC.runPID();
-
 }
 
 /**

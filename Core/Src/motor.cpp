@@ -120,6 +120,36 @@ bool Motor::calibrate() {
 	return false;
 }
 
+bool Motor::calibrateToSpeed(int8_t targetSpeed) {
+	if(calibrated_) return true;
+	oldSpeed_ = currentSpeed;
+	calcCurSpeed_();
+	if (commandFFLookup_[targetSpeed] < 0.001 && targetSpeed >= 1) {
+		float ref = commandFFLookup_[targetSpeed - 1] - 0.02;
+		commandFFLookup_[targetSpeed] = (ref < commandFFLookup_[0] ? commandFFLookup_[0] : ref);
+	}
+
+	if (commandFFLookup_[targetSpeed] > 0.99) {
+		commandFFLookup_[targetSpeed] = 1;
+		return true;
+	}
+	else if(currentSpeed <= targetSpeed && oldSpeed_ < targetSpeed)
+		commandFFLookup_[targetSpeed] += 0.005;
+	else if(currentSpeed >= targetSpeed && oldSpeed_ > targetSpeed)
+		commandFFLookup_[targetSpeed] -= 0.005;
+	else if(currentSpeed == targetSpeed && oldSpeed_ == targetSpeed) {
+		// commandFFLookup_[targetSpeed] -= 0.005;
+		motorCommand(0);
+		return true;
+	}
+	motorCommand(commandFFLookup_[targetSpeed]);
+	return false;
+}
+
+void Motor::calibrateReset() {
+	calibrated_ = false;
+}
+
 /**
   * @brief  Set PID controller gains
   * @param  p
@@ -137,7 +167,8 @@ motorStatus_t Motor::manualCommand(float cmd) {
 	return MOTOR_OK;
 }
 
-void Motor::setTargetSpeed(int32_t speed) {
+void Motor::setTargetSpeed(int8_t speed) {
+	if (abs(speed - targetSpeed_) > 5) iError_ = 0;
 	targetSpeed_ = speed;
 }
 
@@ -158,13 +189,23 @@ motorStatus_t Motor::runPID() {
 	lastError_ = error_;
 	lastEncCount_ = curEncCount_;
 
-	command_ = pGain_*error_ + iGain_*iError_ - dGain_*dError_;
-	if (abs(command_) > 0) {
-		command_ += ((command_ > 0) ? commandBase_ : -commandBase_);
-		command_ = (command_ > 1) ? 1 : command_;
-		command_ = (command_ < -1) ? -1 : command_;
-	}
 	if (targetSpeed_ == 0) command_ = 0;
+	else if (targetSpeed_ > 0) {
+		command_ = 
+			pGain_*error_ 
+			+ iGain_*iError_
+			- dGain_*dError_
+			+ commandFFLookup_[targetSpeed_];
+	}
+	else {
+		command_ = 
+			pGain_*error_ 
+			+ iGain_*iError_
+			- dGain_*dError_
+			- commandFFLookup_[-targetSpeed_];
+	}
+	command_ = (command_ > 1) ? 1 : command_;
+	command_ = (command_ < -1) ? -1 : command_;
 	motorCommand(command_);
 
 	return MOTOR_OK;
@@ -260,6 +301,7 @@ motorStatus_t Motor::motorCommand(float cmd) {
 		motorError_ = COMMAND_MAG_TOO_HIGH_ERR;
 		return MOTOR_ERROR;
 	}
+	command_ = cmd;
 	cmd *= dir_;
 
 	motorStatus_t status;

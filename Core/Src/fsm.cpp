@@ -222,9 +222,9 @@ void FSM::fsmAuxStartup(void) {
 	MotorB.arm();
 	MotorC.arm();
 
-	float p = 0.005; // amount of command to increase by for every count per step in error
-	float i = 0.0005;
-	float d = 0.0005;
+	float p = 0.0000; // amount of command to increase by for every count per step in error
+	float i = 0.00000;
+	float d = 0.00000;
 
 	MotorA.setPID(p, i, d);
 	MotorB.setPID(p, i, d);
@@ -233,16 +233,36 @@ void FSM::fsmAuxStartup(void) {
 }
 
 void FSM::fsmCalibrate(void) {
-	bool calA = MotorA.calibrate();
-	bool calB = MotorB.calibrate();
-	bool calC = MotorC.calibrate();
+	// bool calA = MotorA.calibrate();
+	// bool calB = MotorB.calibrate();
+	// bool calC = MotorC.calibrate();
 
-	if (calA && calB && calC) {
-		MotorA.manualCommand(0);
-		MotorB.manualCommand(0);
-		MotorC.manualCommand(0);
-		fsmTransition(DRIVE);
+	// if (calA && calB && calC) {
+	// 	MotorA.manualCommand(0);
+	// 	MotorB.manualCommand(0);
+	// 	MotorC.manualCommand(0);
+	// 	fsmTransition(DRIVE);
+	// }
+	static bool calA;
+	static bool calB;
+	static bool calC;
+	static int8_t i = 0;
+	while (i < 127) {
+		calA = MotorA.calibrateToSpeed(i);
+		calB = MotorB.calibrateToSpeed(i);
+		calC = MotorC.calibrateToSpeed(i);
+		if (!calA || !calB || !calC) return;
+		MotorA.calibrateReset();
+		MotorB.calibrateReset();
+		MotorC.calibrateReset();
+		++i;
+		return;
 	}
+	MotorA.manualCommand(0);
+	MotorB.manualCommand(0);
+	MotorC.manualCommand(0);
+	i = 0;
+	fsmTransition(DRIVE);
 }
 
 /**

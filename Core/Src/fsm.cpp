@@ -222,9 +222,9 @@ void FSM::fsmAuxStartup(void) {
 	MotorB.arm();
 	MotorC.arm();
 
-	float p = 0.01; // amount of command to increase by for every count per step in error
-	float i = 0.001;
-	float d = 0.001;
+	float p = 0.005; // amount of command to increase by for every count per step in error
+	float i = 0.0005;
+	float d = 0.0005;
 
 	MotorA.setPID(p, i, d);
 	MotorB.setPID(p, i, d);
@@ -262,18 +262,6 @@ void FSM::fsmDrive(void) {
 	MotorB.runPID();
 	MotorC.runPID();
 
-	// nucleoGeneralUpdate ngu_msg = {
-	// 	{0,0,0},
-	// 	{0,0,0},
-	// 	{0,0,0},
-	// 	{0,0,0},
-	// 	MotorA.currentSpeed,
-	// 	MotorB.currentSpeed,
-	// 	MotorC.currentSpeed,
-	// 	0,
-	// 	0
-	// };
-
 	nucleoGeneralUpdate ngu_msg;
 	ngu_msg.a_delta = MotorA.currentSpeed;
 	ngu_msg.b_delta = MotorB.currentSpeed;
@@ -286,38 +274,6 @@ void FSM::fsmDrive(void) {
 		Messaging::NUCLEO_GENERAL_UPDATE);
 
 	OmnibotMessaging.txMessage(&uartMsg);
-
-	// if(!(clockdiv % 4)){
-
-	// 	static uint16_t a_cur = MotorA.getEncoderCount();
-	// 	static uint16_t b_cur = MotorB.getEncoderCount();
-	// 	static uint16_t c_cur = MotorC.getEncoderCount();
-
-	// 	nucleoGeneralUpdate ngu_msg = {
-	// 		{0,0,0},
-	// 		{0,0,0},
-	// 		{0,0,0},
-	// 		{0,0,0},
-	// 		static_cast<int16_t>(a_cur - a_prev),
-	// 		static_cast<int16_t>(b_cur - b_prev),
-	// 		static_cast<int16_t>(c_cur - c_prev),
-	// 		0,
-	// 		0
-	// 	};
-
-	// 	Messaging::Message uartMsg;
-	// 	OmnibotMessaging.generateMessage(
-	// 		&uartMsg,
-	// 		(void*)&ngu_msg,
-	// 		Messaging::NUCLEO_GENERAL_UPDATE);
-
-	// 	OmnibotMessaging.txMessage(&uartMsg);
-	// 	a_prev = a_cur;
-	// 	b_prev = b_cur;
-	// 	c_prev = c_cur;
-	// }
-	// ++clockdiv;
-
 }
 
 /**

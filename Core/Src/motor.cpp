@@ -149,10 +149,6 @@ void Motor::calcCurSpeed_() {
 motorStatus_t Motor::runPID() {
 	if (!pidEnabled_) return MOTOR_OK;
 
-	if (targetSpeed_ == 0) {
-		motorCommand(0);
-		return MOTOR_OK;
-	}
 	oldSpeed_ = currentSpeed;
 	calcCurSpeed_();
 	error_ = targetSpeed_ - currentSpeed;
@@ -168,6 +164,7 @@ motorStatus_t Motor::runPID() {
 		command_ = (command_ > 1) ? 1 : command_;
 		command_ = (command_ < -1) ? -1 : command_;
 	}
+	if (targetSpeed_ == 0) command_ = 0;
 	motorCommand(command_);
 
 	return MOTOR_OK;

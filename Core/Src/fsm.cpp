@@ -7,6 +7,7 @@
 
 #include "fsm.hpp"
 #include "motor.hpp"
+#include "messaging.hpp"
 #include "main.h"
 #include <string.h>
 
@@ -33,6 +34,8 @@ extern uint8_t sdata[SDATA_SIZE_BYTES];
 extern Motor MotorA;
 extern Motor MotorB;
 extern Motor MotorC;
+
+extern Messaging OmnibotMessaging;
 
 /**
 	* @brief  FSM constructor. Sets state to disabled
@@ -249,23 +252,72 @@ void FSM::fsmCalibrate(void) {
 	* @retval none
 	*/
 void FSM::fsmDrive(void) {
-//	bool calA = MotorA.calibrate();
-//	bool calB = MotorB.calibrate();
-//	bool calC = MotorC.calibrate();
-//
-//	if (!calA || !calB || !calC) {
-//		MotorA.manualCommand(0);
-//		MotorB.manualCommand(0);
-//		MotorC.manualCommand(0);
-//		// TODO: this should actually just transition to calibrate, but we need
-//		// to trigger aux startup from pi with a msg which is not implementd yet
-//		fsmTransition(AUX_STARTUP);
-//		return;
-//	}
+
+	static uint8_t clockdiv = 0;
+	static uint16_t a_prev = 0;
+	static uint16_t b_prev = 0;
+	static uint16_t c_prev = 0;
 
 	MotorA.runPID();
 	MotorB.runPID();
 	MotorC.runPID();
+
+	// nucleoGeneralUpdate ngu_msg = {
+	// 	{0,0,0},
+	// 	{0,0,0},
+	// 	{0,0,0},
+	// 	{0,0,0},
+	// 	MotorA.currentSpeed,
+	// 	MotorB.currentSpeed,
+	// 	MotorC.currentSpeed,
+	// 	0,
+	// 	0
+	// };
+
+	nucleoGeneralUpdate ngu_msg;
+	ngu_msg.a_delta = MotorA.currentSpeed;
+	ngu_msg.b_delta = MotorB.currentSpeed;
+	ngu_msg.c_delta = MotorC.currentSpeed;
+
+	Messaging::Message uartMsg;
+	OmnibotMessaging.generateMessage(
+		&uartMsg,
+		(void*)&ngu_msg,
+		Messaging::NUCLEO_GENERAL_UPDATE);
+
+	OmnibotMessaging.txMessage(&uartMsg);
+
+	// if(!(clockdiv % 4)){
+
+	// 	static uint16_t a_cur = MotorA.getEncoderCount();
+	// 	static uint16_t b_cur = MotorB.getEncoderCount();
+	// 	static uint16_t c_cur = MotorC.getEncoderCount();
+
+	// 	nucleoGeneralUpdate ngu_msg = {
+	// 		{0,0,0},
+	// 		{0,0,0},
+	// 		{0,0,0},
+	// 		{0,0,0},
+	// 		static_cast<int16_t>(a_cur - a_prev),
+	// 		static_cast<int16_t>(b_cur - b_prev),
+	// 		static_cast<int16_t>(c_cur - c_prev),
+	// 		0,
+	// 		0
+	// 	};
+
+	// 	Messaging::Message uartMsg;
+	// 	OmnibotMessaging.generateMessage(
+	// 		&uartMsg,
+	// 		(void*)&ngu_msg,
+	// 		Messaging::NUCLEO_GENERAL_UPDATE);
+
+	// 	OmnibotMessaging.txMessage(&uartMsg);
+	// 	a_prev = a_cur;
+	// 	b_prev = b_cur;
+	// 	c_prev = c_cur;
+	// }
+	// ++clockdiv;
+
 }
 
 /**

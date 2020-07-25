@@ -54,6 +54,7 @@ public:
 	void setTargetSpeed(int32_t speed);
 	motorStatus_t runPID();
 	motorStatus_t remap(motorID_t newMotor);
+	uint16_t getEncoderCount();
 
 private:
 	motorID_t motorID_;

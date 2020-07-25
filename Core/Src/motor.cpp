@@ -222,6 +222,9 @@ motorStatus_t Motor::remap(motorID_t newMotor) {
 	}
 }
 
+uint16_t Motor::getEncoderCount() {
+	return curEncCount_;
+}
 
 motorStatus_t Motor::writePWMDuty(TIM_HandleTypeDef * cmd_htim_ptr,
 		TIMChannel_t cmd_channel, 

@@ -124,25 +124,13 @@ bool Motor::calibrateToSpeed(int8_t targetSpeed) {
 	if(calibrated_) return true;
 	oldSpeed_ = currentSpeed;
 	calcCurSpeed_();
-	if (commandFFLookup_[targetSpeed] < 0.001 && targetSpeed >= 1) {
-		float ref = commandFFLookup_[targetSpeed - 1] - 0.02;
-		commandFFLookup_[targetSpeed] = (ref < commandFFLookup_[0] ? commandFFLookup_[0] : ref);
-	}
-
-	if (commandFFLookup_[targetSpeed] > 0.99) {
-		commandFFLookup_[targetSpeed] = 1;
+	if(currentSpeed >= targetSpeed && oldSpeed_ <= targetSpeed || command_ > 0.99) {
+		commandFFLookup_[targetSpeed] = command_;
+//		motorCommand(0);
 		return true;
 	}
-	else if(currentSpeed <= targetSpeed && oldSpeed_ < targetSpeed)
-		commandFFLookup_[targetSpeed] += 0.005;
-	else if(currentSpeed >= targetSpeed && oldSpeed_ > targetSpeed)
-		commandFFLookup_[targetSpeed] -= 0.005;
-	else if(currentSpeed == targetSpeed && oldSpeed_ == targetSpeed) {
-		// commandFFLookup_[targetSpeed] -= 0.005;
-		motorCommand(0);
-		return true;
-	}
-	motorCommand(commandFFLookup_[targetSpeed]);
+	else command_ += 0.0001;
+	motorCommand(command_);
 	return false;
 }
 

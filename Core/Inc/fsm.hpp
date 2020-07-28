@@ -23,9 +23,10 @@ public:
 		DISABLED,
 		CORE_STARTUP,
 		CONFIG,
-	AUX_STARTUP,
+		AUX_STARTUP,
+		CALIBRATE,
 		DRIVE,
-	STOP,
+		STOP_IDLE,
 		FAULT
 	};
 
@@ -35,18 +36,21 @@ public:
 
 	bool fsmTransition(fsmState_t nextState);
 
+	fsmState_t getCurState();
+
 private:
-	fsmState_t _curState;
-	bool _busy = false;
+	fsmState_t curState_;
+	bool busy_ = false;
+	bool calStage1_ = true;
+	uint8_t cal_idx = 1;
 
-	uint16_t _duty = 250;
-
-	void fsmDisable(void);
+	void fsmDisabled(void);
 	void fsmCoreStartup(void);
 	void fsmConfig(void);
 	void fsmAuxStartup(void);
+	void fsmCalibrate(void);
 	void fsmDrive(void);
-	void fsmStop(void);
+	void fsmStopIdle(void);
 	void fsmFault(void);
 };
 

@@ -7,6 +7,7 @@
 
 #include "fsm.hpp"
 #include "motor.hpp"
+#include "messaging.hpp"
 #include "main.h"
 #include <string.h>
 
@@ -14,7 +15,7 @@ extern ADC_HandleTypeDef hadc1;
 
 extern I2C_HandleTypeDef hi2c1;
 
-extern SPI_HandleTypeDef hspi3;
+//extern SPI_HandleTypeDef hspi3;
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
@@ -34,13 +35,15 @@ extern Motor MotorA;
 extern Motor MotorB;
 extern Motor MotorC;
 
+extern Messaging OmnibotMessaging;
+
 /**
 	* @brief  FSM constructor. Sets state to disabled
 	* @note
 	* @param  none
 	* @retval none
 	*/
-FSM::FSM(void) : _curState{DISABLED} {}
+FSM::FSM(void) : curState_{DISABLED} {}
 
 
 /**
@@ -50,12 +53,12 @@ FSM::FSM(void) : _curState{DISABLED} {}
 	* @retval successful execution of FSM step
 	*/
 bool FSM::fsmRun(void) {
-	if (_busy) return false;
-	_busy = true;
-	switch(_curState) {
-	case DISABLED:
-		fsmDisable();
-		break;
+	if (busy_) return false;
+	busy_ = true;
+	switch(curState_) {
+		case DISABLED:
+			fsmDisabled();
+			break;
 		case CORE_STARTUP:
 			fsmCoreStartup();
 			break;
@@ -65,20 +68,23 @@ bool FSM::fsmRun(void) {
 		case AUX_STARTUP:
 			fsmAuxStartup();
 			break;
+		case CALIBRATE:
+			fsmCalibrate();
+			break;
 		case DRIVE:
 			fsmDrive();
 			break;
-		case STOP:
-			fsmStop();
+		case STOP_IDLE:
+			fsmStopIdle();
 			break;
 		case FAULT:
 			fsmFault();
 			break;
 		default:
-			fsmTransition(STOP);
+			fsmTransition(STOP_IDLE);
 			break;
 	}
-	_busy = false;
+	busy_ = false;
 	return true;
 }
 
@@ -91,36 +97,42 @@ bool FSM::fsmRun(void) {
 	*/
 bool FSM::fsmTransition(fsmState_t nextState) {
 	bool validity = INVALID_TRANS;
+	if (nextState == curState_) return VALID_TRANS;
 	switch(nextState) {
 		case DISABLED:
-			if (_curState == STOP) {
+			if (curState_ == STOP_IDLE) {
 				// FSM will start in DISABLE, but otherwise should only get here
-				// after a STOP routine
+				// after a STOP_IDLE routine
 				validity = VALID_TRANS;
 			}
 			break;
 		case CORE_STARTUP:
-			if (_curState == DISABLED) {
+			if (curState_ == DISABLED) {
 				validity = VALID_TRANS;
 			}
 			break;
 		case CONFIG:
-			if (_curState == STOP) {
+			if (curState_ == STOP_IDLE) {
 				// CONFIG should only occur after a STOP
 				validity = VALID_TRANS;
 			}
 			break;
 		case AUX_STARTUP:
-			if (_curState == CORE_STARTUP || _curState == CONFIG) {
+			if (curState_ == STOP_IDLE) {
+				validity = VALID_TRANS;
+			}
+			break;
+		case CALIBRATE:
+			if (curState_ == AUX_STARTUP || curState_ == STOP_IDLE) {
 				validity = VALID_TRANS;
 			}
 			break;
 		case DRIVE:
-			if (_curState == AUX_STARTUP) {
+			if (curState_ == AUX_STARTUP || curState_ == CALIBRATE) {
 				validity = VALID_TRANS;
 			}
 			break;
-		case STOP:
+		case STOP_IDLE:
 			validity = VALID_TRANS;
 			break;
 		case FAULT:
@@ -130,10 +142,15 @@ bool FSM::fsmTransition(fsmState_t nextState) {
 			break;
 	}
 	if (validity) {
-		_curState = nextState;
+		curState_ = nextState;
 	}
 	return validity;
 }
+
+FSM::fsmState_t FSM::getCurState() {
+	return curState_;
+}
+
 
 //TODO: Implement these properly:
 
@@ -143,7 +160,7 @@ bool FSM::fsmTransition(fsmState_t nextState) {
 	* @param  none
 	* @retval none
 	*/
-void FSM::fsmDisable(void) {
+void FSM::fsmDisabled(void) {
 	fsmTransition(CORE_STARTUP);
 }
 
@@ -155,33 +172,31 @@ void FSM::fsmDisable(void) {
 	*/
 void FSM::fsmCoreStartup(void) {
 
-	HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
+	// Motor encoders ready to read
+	HAL_TIM_Encoder_Start(MOTOR_U_ENC_TIM, TIM_CHANNEL_ALL);
+	HAL_TIM_Encoder_Start(MOTOR_V_ENC_TIM, TIM_CHANNEL_ALL);
+	HAL_TIM_Encoder_Start(MOTOR_W_ENC_TIM, TIM_CHANNEL_ALL);
+
+	// Motors disarmed
+	MotorA.disarm();
+	MotorB.disarm();
+	MotorC.disarm();
+
+	// Motor command PWM generation -- initialized at 0% duty cycle
+	HAL_TIM_PWM_Start(MOTOR_U_CMD1_TIMER, MOTOR_U_CMD1_CHANNEL);
+	HAL_TIM_PWM_Start(MOTOR_U_CMD2_TIMER, MOTOR_U_CMD2_CHANNEL);
+
+	HAL_TIM_PWM_Start(MOTOR_V_CMD1_TIMER, MOTOR_V_CMD1_CHANNEL);
+	HAL_TIM_PWM_Start(MOTOR_V_CMD2_TIMER, MOTOR_V_CMD2_CHANNEL);
+
+	HAL_TIM_PWM_Start(MOTOR_W_CMD1_TIMER, MOTOR_W_CMD1_CHANNEL);
+	HAL_TIM_PWM_Start(MOTOR_W_CMD2_TIMER, MOTOR_W_CMD2_CHANNEL);
 
 	// Start timer for timed interrupt for FSM task
 	HAL_TIM_Base_Start_IT(&htim9);
 
-	// Motor encoders ready to read
-	HAL_TIM_Encoder_Start(MOTOR_A_ENC_TIM, TIM_CHANNEL_ALL);
-	HAL_TIM_Encoder_Start(MOTOR_B_ENC_TIM, TIM_CHANNEL_ALL);
-	HAL_TIM_Encoder_Start(MOTOR_C_ENC_TIM, TIM_CHANNEL_ALL);
-
-	// Motors disarmed
-	HAL_GPIO_WritePin(MOTOR_A_ARM_GPIO_Port, MOTOR_A_ARM_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(MOTOR_B_ARM_GPIO_Port, MOTOR_B_ARM_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(MOTOR_C_ARM_ALT_GPIO_Port, MOTOR_C_ARM_ALT_Pin, GPIO_PIN_RESET);
-
-	// Motor command PWM generation -- initialized at 0% duty cycle
-	HAL_TIM_PWM_Start(MOTOR_A_CMD1_TIMER, MOTOR_A_CMD1_CHANNEL);
-	HAL_TIM_PWM_Start(MOTOR_A_CMD2_TIMER, MOTOR_A_CMD2_CHANNEL);
-
-	HAL_TIM_PWM_Start(MOTOR_B_CMD1_TIMER, MOTOR_B_CMD1_CHANNEL);
-	HAL_TIM_PWM_Start(MOTOR_B_CMD2_TIMER, MOTOR_B_CMD2_CHANNEL);
-
-	HAL_TIM_PWM_Start(MOTOR_C_CMD1_TIMER, MOTOR_C_CMD1_CHANNEL);
-	HAL_TIM_PWM_Start(MOTOR_C_CMD2_TIMER, MOTOR_C_CMD2_CHANNEL);
-
 	// Auto transition
-	fsmTransition(AUX_STARTUP);
+	fsmTransition(STOP_IDLE);
 }
 
 /**
@@ -191,7 +206,9 @@ void FSM::fsmCoreStartup(void) {
 	* @retval none
 	*/
 void FSM::fsmConfig(void) {
-
+	// HAL_TIM_Base_Stop_IT(&htim9);
+	// fsmTransition(STOP_IDLE);
+	// HAL_TIM_Base_Start_IT(&htim9);
 }
 
 /**
@@ -205,17 +222,58 @@ void FSM::fsmAuxStartup(void) {
 	MotorB.arm();
 	MotorC.arm();
 
-	MotorA.setTarSpeed(10);
-	MotorB.setTarSpeed(10);
-	MotorC.setTarSpeed(10);
+	// float p = 0.05; // amount of command to increase by for every count per step in error
+	// float i = 0.005;
+	// float d = 0.005;
 
-	float p = 0.01; // amount of command to increase by for every count per step in error
-	float i = 0.00;
-	float d = 0.00;
+	// MotorA.setPID(p, i, d);
+	// MotorB.setPID(p, i, d);
+	// MotorC.setPID(p, i, d);
+	 fsmTransition(CALIBRATE);
+}
 
-	MotorA.setPID(p, i, d);
-	MotorB.setPID(p, i, d);
-	MotorC.setPID(p, i, d);
+void FSM::fsmCalibrate(void) {
+	static bool calA;
+	static bool calB;
+	static bool calC;
+	if (calStage1_) {
+		calA = MotorA.calibrateBase();
+		calB = MotorB.calibrateBase();
+		calC = MotorC.calibrateBase();
+		if (!calA || !calB || !calC) return;
+		MotorA.calibrateReset();
+		MotorB.calibrateReset();
+		MotorC.calibrateReset();
+		MotorA.manualCommand(0);
+		MotorB.manualCommand(0);
+		MotorC.manualCommand(0);
+		MotorA.manualCommand(MotorA.commandBase * 0.5);
+		MotorB.manualCommand(MotorB.commandBase * 0.5);
+		MotorC.manualCommand(MotorC.commandBase * 0.5);
+	}
+	calStage1_ = false;
+
+	// if (calA && calB && calC) {
+	// 	MotorA.manualCommand(0);
+	// 	MotorB.manualCommand(0);
+	// 	MotorC.manualCommand(0);
+	// 	fsmTransition(DRIVE);
+	// }
+	while (cal_idx < 127) {
+		calA = MotorA.calibrateToSpeed(cal_idx);
+		calB = MotorB.calibrateToSpeed(cal_idx);
+		calC = MotorC.calibrateToSpeed(cal_idx);
+		if (!calA || !calB || !calC) return;
+		MotorA.calibrateReset();
+		MotorB.calibrateReset();
+		MotorC.calibrateReset();
+		++cal_idx;
+		return;
+	}
+	MotorA.manualCommand(0);
+	MotorB.manualCommand(0);
+	MotorC.manualCommand(0);
+	cal_idx = 1;
 	fsmTransition(DRIVE);
 }
 
@@ -226,21 +284,28 @@ void FSM::fsmAuxStartup(void) {
 	* @retval none
 	*/
 void FSM::fsmDrive(void) {
-	_duty = (_duty < 500) ? 900 : 100;
-	static float cmd = 0.3;
-//	cmd = (cmd > 0.75) ? 0.5 : 1;
-	HAL_GPIO_TogglePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin);
 
-	MotorA.manualCommand(cmd);
-	MotorB.manualCommand(cmd);
-	MotorC.manualCommand(cmd);
+	static uint8_t clockdiv = 0;
+	static uint16_t a_prev = 0;
+	static uint16_t b_prev = 0;
+	static uint16_t c_prev = 0;
 
-//	MotorA.runPID();
-//	MotorB.runPID();
-//	MotorC.runPID();
+	MotorA.runPID();
+	MotorB.runPID();
+	MotorC.runPID();
 
-	char msg[] = "Hello Nucleo Nuf!\n\r";
-	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 0xFFFF);
+	nucleoGeneralUpdate ngu_msg;
+	ngu_msg.a_delta = MotorA.currentSpeed;
+	ngu_msg.b_delta = MotorB.currentSpeed;
+	ngu_msg.c_delta = MotorC.currentSpeed;
+
+	Messaging::Message uartMsg;
+	OmnibotMessaging.generateMessage(
+		&uartMsg,
+		(void*)&ngu_msg,
+		Messaging::NUCLEO_GENERAL_UPDATE);
+
+	OmnibotMessaging.txMessage(&uartMsg);
 }
 
 /**
@@ -249,8 +314,10 @@ void FSM::fsmDrive(void) {
 	* @param  none
 	* @retval none
 	*/
-void FSM::fsmStop(void) {
-
+void FSM::fsmStopIdle(void) {
+	MotorA.disarm();
+	MotorB.disarm();
+	MotorC.disarm();
 }
 
 /**

@@ -18,10 +18,10 @@
 #include "main.h"
 #include "stm32f4xx_hal.h"
 
-enum motorID_t {
-	MOTOR_A,
-	MOTOR_B,
-	MOTOR_C
+enum motorID_t : uint8_t {
+	MOTOR_U,
+	MOTOR_V,
+	MOTOR_W
 };
 
 enum motorStatus_t {
@@ -39,39 +39,53 @@ enum motorError_t {
 
 class Motor{
 public:
-	int32_t currentSpeed;
+	int8_t currentSpeed;
 
 	Motor(motorID_t motorID, float p, float i, float d, float samTime, float cfFreq, uint8_t dir);
 	motorStatus_t init();
+	bool calibrateBase();
+	bool calibrateToSpeed(int8_t targetSpeed);
+	void calibrateReset();
 	motorStatus_t arm();
 	motorStatus_t disarm();
+	motorStatus_t getStatus();
+	motorStatus_t pidEnable();
+	motorStatus_t pidDisable();
 	void setPID(float p, float i, float d);
 	motorStatus_t manualCommand(float cmd);
-	void setTarSpeed(int32_t speed);
-	void calcCurSpeed();
+	void setTargetSpeed(int8_t speed);
 	motorStatus_t runPID();
+	motorStatus_t remap(motorID_t newMotor);
+	uint16_t getEncoderCount();
+	float commandBase;
 
 private:
 	motorID_t motorID_;
 	motorStatus_t motorStatus_;
 	motorError_t motorError_;
 
+	bool calibrated_ = false;
+
+	bool pidEnabled_ = false;
+
 	float pGain_, iGain_, dGain_;
 	float samplingTime_;
-	int32_t targetSpeedCountsPerStep_;
+	int8_t targetSpeed_;
 	float command_;
-	int32_t error_; // counts per step
-	int32_t lastError_; // counts per step
-	int32_t iError_; // counts
-	int32_t dError_; // (counts per step) per step
+	float commandBase_;
+	int8_t error_; // counts per step
+	int8_t lastError_; // counts per step
+	int16_t iError_; // counts
+	int16_t dError_; // (counts per step) per step
 	uint16_t curEncCount_;
 	uint16_t lastEncCount_;
+	int8_t oldSpeed_;
 	float cutoffFreq_;
 	float filtConst_;
 	int8_t dir_;
 	uint16_t cmdDutyDenom_;
 	
-	int32_t oldSpeed_;
+	float commandFFLookup_[128] = {0};
 
 	TIM_HandleTypeDef * encTIM_;
 	TIM_HandleTypeDef * cmd1TIM_;
@@ -85,6 +99,7 @@ private:
 			TIMChannel_t cmd_channel,
 			float duty_mag);
 	motorStatus_t motorCommand(float cmd);
+	void calcCurSpeed_();
 };
 
 #endif /* INC_MOTOR_HPP_ */

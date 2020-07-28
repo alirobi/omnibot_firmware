@@ -64,6 +64,7 @@ DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
 uint8_t sdata[SDATA_SIZE_BYTES];
+ADC_AnalogWDGConfTypeDef AnalogWDGConfig;
 /* USER CODE BEGIN PV */
 //int8_t pike_buff[42];
 struct pi2nu *msg;
@@ -100,24 +101,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
   //Do what you want on the adc
-	if(hadc->Instance == ADC1 && i < 100){
-		ADC_DATA[i] = HAL_ADC_GetValue(&hadc1);
-		i++;
-		HAL_ADC_Start_IT(&hadc1);
-	}else{
-		HAL_ADC_Stop_IT(&hadc1);
-	}
-
-//	if(HAL_ADC_GetValue(&hadc1) > 1){
-//
-//	}
-//	if(i < 10000){
-//		ADC_DATA[i] = HAL_ADC_GetValue(&hadc1);
-//		i++;
-//		HAL_ADC_Start_IT(&hadc1);
-//	}else{
-//		HAL_ADC_Stop_IT(&hadc1);
-//	}
+//	value++;
+	ADC_DATA[i] = HAL_ADC_GetValue(&hadc1);
+	i++;
+}
+void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef* hadc)
+{
+	value++;
 }
 /* USER CODE END 0 */
 
@@ -137,7 +127,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -171,7 +161,8 @@ int main(void)
   HAL_UART_Receive_IT (&huart1, sdata, SDATA_SIZE_BYTES);
   char data[6] = {0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6};
 
-  HAL_ADC_Start_IT(&hadc1);
+//  HAL_ADC_Start_IT(&hadc1);
+
 //  for (;;){
 ////	  if (HAL_ADC_PollForConversion(&hadc1, 1000000) == HAL_OK){
 //		  ADC_DATA = HAL_ADC_GetValue(&hadc1);
@@ -188,11 +179,7 @@ int main(void)
 		cur_cntsB = (MOTOR_B_ENC_TIM)->Instance->CNT & 0xFFFF;
 		cur_cntsC = (MOTOR_C_ENC_TIM)->Instance->CNT & 0xFFFF;
 		loop();
-//		while(HAL_ADC_GetState(&hadc1) != HAL_ADC_STATE_REG_EOC){
-
-//		}
-//		value = HAL_ADC_GetValue(&hadc1);
-//		HAL_ADC_Start(&hadc1);
+		HAL_ADC_Start_IT(&hadc1);
 		//HAL_GPIO_WritePin(TEST_PIN_GPIO_Port, TEST_PIN_Pin, GPIO_PIN_SET);
 //		HAL_UART_Transmit(&huart2, pike_buff, 11, 0xFFFF);
     /* USER CODE END WHILE */
@@ -252,6 +239,7 @@ static void MX_ADC1_Init(void)
 
   /* USER CODE END ADC1_Init 0 */
 
+  ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
   ADC_ChannelConfTypeDef sConfig = {0};
 
   /* USER CODE BEGIN ADC1_Init 1 */
@@ -262,16 +250,27 @@ static void MX_ADC1_Init(void)
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = DISABLE;
+  hadc1.Init.ScanConvMode = ENABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.DiscontinuousConvMode = ENABLE;
+  hadc1.Init.NbrOfDiscConversion = 1;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 3;
   hadc1.Init.DMAContinuousRequests = DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure the analog watchdog 
+  */
+  AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_ALL_REGINJEC;
+  AnalogWDGConfig.HighThreshold = 4095;
+  AnalogWDGConfig.LowThreshold = 4090;
+  AnalogWDGConfig.ITMode = ENABLE;
+  if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
     Error_Handler();
   }
@@ -284,8 +283,31 @@ static void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  */
+  sConfig.Channel = ADC_CHANNEL_9;
+  sConfig.Rank = 2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  */
+  sConfig.Channel = ADC_CHANNEL_7;
+  sConfig.Rank = 3;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN ADC1_Init 2 */
-
+//  AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_SINGLE_REG;
+//  AnalogWDGConfig.Channel = ADC_CHANNEL_11;
+//  AnalogWDGConfig.ITMode = ENABLE;
+//  AnalogWDGConfig.HighThreshold = 4096;
+//  AnalogWDGConfig.LowThreshold = 4092;
+//  if(HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK){
+//	  Error_Handler();
+//  }
   /* USER CODE END ADC1_Init 2 */
 
 }

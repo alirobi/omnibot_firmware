@@ -10,4 +10,4 @@
 !*.ld
 !*.cpp
 /Drivers/
-Debug/makefile
+/Debug/

@@ -43,7 +43,7 @@ public:
 
 	Motor(motorID_t motorID, float p, float i, float d, float samTime, float cfFreq, uint8_t dir);
 	motorStatus_t init();
-	bool calibrate();
+	bool calibrateBase();
 	bool calibrateToSpeed(int8_t targetSpeed);
 	void calibrateReset();
 	motorStatus_t arm();
@@ -57,6 +57,7 @@ public:
 	motorStatus_t runPID();
 	motorStatus_t remap(motorID_t newMotor);
 	uint16_t getEncoderCount();
+	float commandBase;
 
 private:
 	motorID_t motorID_;

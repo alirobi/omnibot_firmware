@@ -97,6 +97,8 @@ motorStatus_t Motor::init() {
 	cmdDutyDenom_ = cmd1TIM_->Instance->ARR;
 	lastEncCount_ = (encTIM_)->Instance->CNT & 0xFFFF;
 	curEncCount_ = lastEncCount_;
+	command_ = 0;
+	commandBase_ = 0;
 	// TODO: check other things
 	motorStatus_ = MOTOR_OK;
 	return MOTOR_OK;
@@ -108,12 +110,15 @@ motorStatus_t Motor::init() {
   * @param  none
   * @retval Motor Status
   */
-bool Motor::calibrate() {
+bool Motor::calibrateBase() {
 	if(calibrated_) return true;
 	calcCurSpeed_();
 	if(currentSpeed < 2) commandBase_ += 0.01;
 	else {
 		commandBase_ -= 0.01;
+		commandBase = commandBase_;
+		commandFFLookup_[0] = commandBase_;
+		calibrated_ = true;
 		return true;
 	}
 	motorCommand(commandBase_);
@@ -124,12 +129,13 @@ bool Motor::calibrateToSpeed(int8_t targetSpeed) {
 	if(calibrated_) return true;
 	oldSpeed_ = currentSpeed;
 	calcCurSpeed_();
-	if(currentSpeed >= targetSpeed && oldSpeed_ <= targetSpeed || command_ > 0.99) {
+	if((currentSpeed >= targetSpeed && oldSpeed_ <= targetSpeed) || command_ > 0.99) {
 		commandFFLookup_[targetSpeed] = command_;
 //		motorCommand(0);
+		calibrated_ = true;
 		return true;
 	}
-	else command_ += 0.0001;
+	else command_ += 0.0005;
 	motorCommand(command_);
 	return false;
 }

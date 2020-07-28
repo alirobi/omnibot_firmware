@@ -42,9 +42,9 @@ void sendMessageUART(Messaging::Message* msg_buf);
 void rxMsgCallback(Messaging::Message &msg);
 
 LSM6      IMU;
-Motor     MotorA(MOTOR_U, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
-Motor     MotorB(MOTOR_V, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
-Motor     MotorC(MOTOR_W, 0, 0, 0, 0.01, 100, DIR_DEFAULT);
+Motor     MotorA(MOTOR_U, 0.005, 0.0005, 0.0005, 0.01, 100, DIR_DEFAULT);
+Motor     MotorB(MOTOR_V, 0.005, 0.0005, 0.0005, 0.01, 100, DIR_DEFAULT);
+Motor     MotorC(MOTOR_W, 0.005, 0.0005, 0.0005, 0.01, 100, DIR_DEFAULT);
 FSM       OmnibotFSM;
 Messaging OmnibotMessaging(&sendMessageUART, &rxMsgCallback);
 
@@ -183,17 +183,16 @@ void rxMsgCallback(Messaging::Message &msg) {
 			OmnibotFSM.fsmTransition(FSM::STOP_IDLE);
 			OmnibotFSM.fsmTransition(FSM::CONFIG);
 
-			globalPID globalPID_data = *((globalPID*)(msg.msgData));
+			globalPID * globalPID_data = ((globalPID*)(msg.msgData));
 
-			MotorA.setPID(globalPID_data.pGain,
-			              globalPID_data.iGain,
-			              globalPID_data.dGain);
-			MotorB.setPID(globalPID_data.pGain,
-			              globalPID_data.iGain,
-			              globalPID_data.dGain);
-			MotorC.setPID(globalPID_data.pGain,
-			              globalPID_data.iGain,
-			              globalPID_data.dGain);
+			float p = globalPID_data->pGain;
+			float i = globalPID_data->iGain;
+			float d = globalPID_data->dGain;
+
+			MotorA.setPID(p, i, d);
+			MotorB.setPID(p, i, d);
+			MotorC.setPID(p, i, d);
+			OmnibotFSM.fsmTransition(FSM::STOP_IDLE);
 		}break;
 		case Messaging::SINGLE_PID: {
 			OmnibotFSM.fsmTransition(FSM::STOP_IDLE);
@@ -218,6 +217,7 @@ void rxMsgCallback(Messaging::Message &msg) {
 			                  singlePID_data.dGain);
 					break;
 			}
+			OmnibotFSM.fsmTransition(FSM::STOP_IDLE);
 		}break;
 		case Messaging::NULLMSG: {
 		}break;

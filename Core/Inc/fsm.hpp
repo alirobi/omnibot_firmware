@@ -41,6 +41,8 @@ public:
 private:
 	fsmState_t curState_;
 	bool busy_ = false;
+	bool calStage1_ = true;
+	uint8_t cal_idx = 1;
 
 	void fsmDisabled(void);
 	void fsmCoreStartup(void);

@@ -206,9 +206,9 @@ void FSM::fsmCoreStartup(void) {
 	* @retval none
 	*/
 void FSM::fsmConfig(void) {
-	HAL_TIM_Base_Stop_IT(&htim9);
-	fsmTransition(STOP_IDLE);
-	HAL_TIM_Base_Start_IT(&htim9);
+	// HAL_TIM_Base_Stop_IT(&htim9);
+	// fsmTransition(STOP_IDLE);
+	// HAL_TIM_Base_Start_IT(&htim9);
 }
 
 /**
@@ -222,20 +222,36 @@ void FSM::fsmAuxStartup(void) {
 	MotorB.arm();
 	MotorC.arm();
 
-	float p = 0.0000; // amount of command to increase by for every count per step in error
-	float i = 0.00000;
-	float d = 0.00000;
+	// float p = 0.05; // amount of command to increase by for every count per step in error
+	// float i = 0.005;
+	// float d = 0.005;
 
-	MotorA.setPID(p, i, d);
-	MotorB.setPID(p, i, d);
-	MotorC.setPID(p, i, d);
-	fsmTransition(CALIBRATE);
+	// MotorA.setPID(p, i, d);
+	// MotorB.setPID(p, i, d);
+	// MotorC.setPID(p, i, d);
+	 fsmTransition(CALIBRATE);
 }
 
 void FSM::fsmCalibrate(void) {
-	// bool calA = MotorA.calibrate();
-	// bool calB = MotorB.calibrate();
-	// bool calC = MotorC.calibrate();
+	static bool calA;
+	static bool calB;
+	static bool calC;
+	if (calStage1_) {
+		calA = MotorA.calibrateBase();
+		calB = MotorB.calibrateBase();
+		calC = MotorC.calibrateBase();
+		if (!calA || !calB || !calC) return;
+		MotorA.calibrateReset();
+		MotorB.calibrateReset();
+		MotorC.calibrateReset();
+		MotorA.manualCommand(0);
+		MotorB.manualCommand(0);
+		MotorC.manualCommand(0);
+		MotorA.manualCommand(MotorA.commandBase * 0.5);
+		MotorB.manualCommand(MotorB.commandBase * 0.5);
+		MotorC.manualCommand(MotorC.commandBase * 0.5);
+	}
+	calStage1_ = false;
 
 	// if (calA && calB && calC) {
 	// 	MotorA.manualCommand(0);
@@ -243,25 +259,21 @@ void FSM::fsmCalibrate(void) {
 	// 	MotorC.manualCommand(0);
 	// 	fsmTransition(DRIVE);
 	// }
-	static bool calA;
-	static bool calB;
-	static bool calC;
-	static int8_t i = 0;
-	while (i < 127) {
-		calA = MotorA.calibrateToSpeed(i);
-		calB = MotorB.calibrateToSpeed(i);
-		calC = MotorC.calibrateToSpeed(i);
+	while (cal_idx < 127) {
+		calA = MotorA.calibrateToSpeed(cal_idx);
+		calB = MotorB.calibrateToSpeed(cal_idx);
+		calC = MotorC.calibrateToSpeed(cal_idx);
 		if (!calA || !calB || !calC) return;
 		MotorA.calibrateReset();
 		MotorB.calibrateReset();
 		MotorC.calibrateReset();
-		++i;
+		++cal_idx;
 		return;
 	}
 	MotorA.manualCommand(0);
 	MotorB.manualCommand(0);
 	MotorC.manualCommand(0);
-	i = 0;
+	cal_idx = 1;
 	fsmTransition(DRIVE);
 }
 

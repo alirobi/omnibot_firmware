@@ -9,5 +9,5 @@
 !*.hpp
 !*.ld
 !*.cpp
-/Drivers/
-/Debug/
+Drivers/*
+Debug/*

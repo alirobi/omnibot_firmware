@@ -259,21 +259,21 @@ void FSM::fsmCalibrate(void) {
 	// 	MotorC.manualCommand(0);
 	// 	fsmTransition(DRIVE);
 	// }
-	while (cal_idx < 127) {
-		calA = MotorA.calibrateToSpeed(cal_idx);
-		calB = MotorB.calibrateToSpeed(cal_idx);
-		calC = MotorC.calibrateToSpeed(cal_idx);
-		if (!calA || !calB || !calC) return;
-		MotorA.calibrateReset();
-		MotorB.calibrateReset();
-		MotorC.calibrateReset();
-		++cal_idx;
-		return;
-	}
-	MotorA.manualCommand(0);
-	MotorB.manualCommand(0);
-	MotorC.manualCommand(0);
-	cal_idx = 1;
+	// while (cal_idx < 127) {
+	// 	calA = MotorA.calibrateToSpeed(cal_idx);
+	// 	calB = MotorB.calibrateToSpeed(cal_idx);
+	// 	calC = MotorC.calibrateToSpeed(cal_idx);
+	// 	if (!calA || !calB || !calC) return;
+	// 	MotorA.calibrateReset();
+	// 	MotorB.calibrateReset();
+	// 	MotorC.calibrateReset();
+	// 	++cal_idx;
+	// 	return;
+	// }
+	// MotorA.manualCommand(0);
+	// MotorB.manualCommand(0);
+	// MotorC.manualCommand(0);
+	// cal_idx = 1;
 	fsmTransition(DRIVE);
 }
 
